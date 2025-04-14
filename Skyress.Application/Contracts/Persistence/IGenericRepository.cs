@@ -1,4 +1,5 @@
-﻿using Skyress.Domain.primitives;
+﻿using System.Linq.Expressions;
+using Skyress.Domain.primitives;
 
 namespace Skyress.Application.Contracts.Persistence
 {
@@ -13,5 +14,11 @@ namespace Skyress.Application.Contracts.Persistence
         public Task<T> UpdateAsync(T entity);
 
         public Task DeleteByIdAsync(long id);
+
+        public IQueryable<T> GetAsync(
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            List<Expression<Func<T, object>>>? includes = null,
+            bool disableTracking = false);
     }
 }
