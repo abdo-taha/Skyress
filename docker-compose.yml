@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  Skyress.api:
+    image: ${DOCKER_REGISTRY-}skyressapi
+    container_name: skyress
+    build:
+      context: .
+      dockerfile: Skyress/Dockerfile
+    ports:
+       - "5000:5000"
+       - "5001:5001"
+  Skyress.database:
+    image: postgres:latest
+    container_name: SkyressDB
+    environment:
+          POSTGRES_USER: Skyress
+          POSTGRES_PASSWORD: Skyress
+          POSTGRES_DB: Skyress
+    ports:
+        - "5432:5432"
+    volumes:
+        - Skyress_data:/var/lib/postgresql/data
+volumes:
+  Skyress_data:

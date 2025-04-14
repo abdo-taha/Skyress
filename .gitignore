@@ -1,0 +1,16 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/bin/Debug
+/obj
+/Skyress/bin
+/Skyress/obj
+/Skyress.Application/bin
+/Skyress.Application/obj
+/Skyress/Skyress.API.csproj.user
+/Skyress.Infrastructure/bin
+/Skyress.Infrastructure/obj
+/Skyress.Domain/obj
+/Skyress.Domain/bin

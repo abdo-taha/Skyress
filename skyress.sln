@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skyress.API", "Skyress\Skyress.API.csproj", "{250AF5DC-E1CD-4676-8FE0-A22A83825969}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skyress.Domain", "Skyress.Domain\Skyress.Domain.csproj", "{FCD9B499-84CA-4465-82DD-DE625C172C36}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skyress.Application", "Skyress.Application\Skyress.Application.csproj", "{7BFCAA3B-C78B-4FFF-BD4C-14E91D294985}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skyress.Infrastructure", "Skyress.Infrastructure\Skyress.Infrastructure.csproj", "{D9966F01-F41A-47D5-AD48-5313ADF5E539}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{331E7A49-2B54-444B-8746-9DD85A1B8DF8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{250AF5DC-E1CD-4676-8FE0-A22A83825969}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{250AF5DC-E1CD-4676-8FE0-A22A83825969}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{250AF5DC-E1CD-4676-8FE0-A22A83825969}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{250AF5DC-E1CD-4676-8FE0-A22A83825969}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCD9B499-84CA-4465-82DD-DE625C172C36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCD9B499-84CA-4465-82DD-DE625C172C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCD9B499-84CA-4465-82DD-DE625C172C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCD9B499-84CA-4465-82DD-DE625C172C36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BFCAA3B-C78B-4FFF-BD4C-14E91D294985}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BFCAA3B-C78B-4FFF-BD4C-14E91D294985}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BFCAA3B-C78B-4FFF-BD4C-14E91D294985}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BFCAA3B-C78B-4FFF-BD4C-14E91D294985}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9966F01-F41A-47D5-AD48-5313ADF5E539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9966F01-F41A-47D5-AD48-5313ADF5E539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9966F01-F41A-47D5-AD48-5313ADF5E539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9966F01-F41A-47D5-AD48-5313ADF5E539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {40F4CCDA-20C0-4A0A-8206-D05D1690CC7A}
+	EndGlobalSection
+EndGlobal
