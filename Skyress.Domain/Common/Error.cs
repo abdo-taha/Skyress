@@ -1,24 +1,18 @@
 ﻿namespace Skyress.Domain.Common;
 
-public class Error : IEquatable<Error>
+public class Error(string code, string message) : IEquatable<Error>
 {
     public static readonly Error None = new Error(string.Empty, string.Empty);
 
-    public Error(string code, string message)
-    {
-        Code = code;
-        Message = message;
-    }
-
-    public string Code { get; }
-    public string Message { get; }
+    public string Code { get; } = code;
+    public string Message { get; } = message;
 
     public static implicit operator string(Error error) => error.Code;
 
     public static bool operator ==(Error? a, Error? b)
     {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
+        if (a is null && b is null) return true;
+        if (a is null || b is null) return false;
         return a.Code == b.Code;
     }
     public static bool operator !=(Error? a, Error? b)

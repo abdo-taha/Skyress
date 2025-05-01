@@ -2,7 +2,7 @@
 
 public class Result
 {
-    protected internal Result(bool isSuccess, Error error)
+    protected Result(bool isSuccess, Error error)
     {
         if (isSuccess && Error != Error.None)
         {
@@ -26,12 +26,7 @@ public class Result
 
     public static Result<TValue> Success<TValue>(TValue? value) => new Result<TValue>(value, true, Error.None);
 
-    public static Result<TValue> Create<TValue>(TValue value, Error error)
-    where TValue : class
-    => value is null ? Failure<TValue>(error) : Success(value);
-
     public static Result Failure(Error error) => new Result(false, error);
-    public static Result<TValue> Failure<TValue>(Error error) => new Result<TValue>(default!, false, error);
 
     public static Result<TValue> Create<TValue>(TValue? value) => Success(value);
 
