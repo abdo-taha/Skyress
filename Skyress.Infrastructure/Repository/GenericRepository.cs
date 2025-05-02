@@ -8,7 +8,7 @@ namespace Skyress.Infrastructure.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : AggregateRoot
     {
-        private readonly SkyressDbContext skyressDbContext;
+        protected readonly SkyressDbContext skyressDbContext;
         protected readonly DbSet<T> dbSet;
 
         protected GenericRepository(SkyressDbContext skyressDbContext)

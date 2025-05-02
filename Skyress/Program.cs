@@ -1,5 +1,6 @@
 using Skyress.API.Extenstions;
 using Serilog;
+using Skyress.API.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -20,6 +21,7 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+app.MapItemsApiV1();
 
 app.MapControllers();
 app.Run();
