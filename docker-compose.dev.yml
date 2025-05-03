@@ -1,0 +1,42 @@
+﻿version: '3.8'
+
+services:
+  skyress.api:
+    build:
+      context: .
+      dockerfile: Skyress/Dockerfile
+    image: skyressapi
+    container_name: skyress
+    environment:
+      - ConnectionStrings__SkyressDb=Host=skyress.db;Port=5432;Database=Skyress;Username=Skyress;Password=Skyress
+    depends_on:
+      skyress.db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/logs
+
+  skyress.db:
+    image: postgres:15.3-alpine
+    container_name: skyress.db
+    environment:
+      POSTGRES_USER: Skyress
+      POSTGRES_PASSWORD: Skyress
+      POSTGRES_DB: Skyress
+    ports:
+      - "5432:5432"
+    volumes:
+      - skyress_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Skyress -d Skyress"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - skyress-network
+
+volumes:
+  skyress_data:
+
+networks:
+  skyress-network:
+    external: false

@@ -1,25 +1,20 @@
-version: '3.4'
+version: '3.8'
 
 services:
-  Skyress.api:
-    image: ${DOCKER_REGISTRY-}skyressapi
-    container_name: skyress
+  skyress.api:
     build:
       context: .
       dockerfile: Skyress/Dockerfile
+    image: skyressapi
+    container_name: skyress
     ports:
-       - "5000:5000"
-       - "5001:5001"
-  Skyress.database:
-    image: postgres:latest
-    container_name: SkyressDB
+      - "5000:5000"
+      - "5001:5001"
     environment:
-          POSTGRES_USER: Skyress
-          POSTGRES_PASSWORD: Skyress
-          POSTGRES_DB: Skyress
-    ports:
-        - "5432:5432"
-    volumes:
-        - Skyress_data:/var/lib/postgresql/data
-volumes:
-  Skyress_data:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+    networks:
+      - skyress-network
+
+networks:
+  skyress-network:
+    driver: bridge

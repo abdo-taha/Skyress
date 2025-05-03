@@ -1,0 +1,23 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.4"
+services:
+  Skyress.api:
+    build:
+      context: "C:\\Users\\ABDO\\Desktop\\shop dotnet"
+      dockerfile: "Skyress/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/Skyress.API.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "skyress-registryskyressapi:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\ABDO\\Desktop\\shop dotnet\\Skyress:/app:rw"
+    - "C:\\Users\\ABDO\\Desktop\\shop dotnet:/src:rw"
+    - "C:\\Users\\ABDO\\AppData\\Roaming\\Microsoft\\UserSecrets:/home/app/.microsoft/usersecrets"
+    - "C:\\Users\\ABDO\\.nuget\\packages:/home/app/.nuget/packages"
+    working_dir: "/app"

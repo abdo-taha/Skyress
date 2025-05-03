@@ -1,3 +1,5 @@
+using Asp.Versioning.Conventions;
+
 namespace Skyress.API.Endpoints;
 
 using MediatR;
@@ -11,15 +13,38 @@ using Skyress.Domain.Aggregates.Item;
 // todo [AsParameters] ItemServices
 public static class ItemsApi
 {
-    public static RouteGroupBuilder MapItemsApiV1(this IEndpointRouteBuilder app)
+    public static void MapItemsApi(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("api/items").HasApiVersion(1.0);
+        app.MapItemsApiV1();
+        app.MapItemsApiV2();
+    }
+
+    private static RouteGroupBuilder MapItemsApiV1(this IEndpointRouteBuilder app)
+    {
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(1.0)
+            .ReportApiVersions()
+            .Build();
+        var api = app.MapGroup("api/items").WithApiVersionSet(versionSet);
 
         api.MapGet("{id:long}", GetItemByIdAsync);
         api.MapPost("/", CreateItemAsync);
         api.MapPut("{id:long}", UpdateItemAsync);
         api.MapDelete("{id:long}", DeleteItemAsync);
 
+        return api;
+    }
+    
+    private static RouteGroupBuilder MapItemsApiV2(this IEndpointRouteBuilder app)
+    {
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(2.0)
+            .ReportApiVersions()
+            .Build();
+        var api = app.MapGroup("api/items").WithApiVersionSet(versionSet);
+    
+        api.MapGet("{id:long}", GetItemByIdAsync);
+    
         return api;
     }
 
