@@ -46,7 +46,8 @@ public class UpdateItemCommandHandler(IItemRepository itemRepository) : ICommand
                 CreaedAt = existingItem.CreaedAt
             };
 
-            var updatedItem = await itemRepository.UpdateAsync(item);
+            var updatedItem = itemRepository.UpdateAsync(item);
+            await itemRepository.UnitOfWork.SaveChangesAsync();
             return Result.Success(updatedItem);
         }
         catch (Exception ex)

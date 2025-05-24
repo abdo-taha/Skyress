@@ -38,6 +38,7 @@ public class CreateItemCommandHandler(IItemRepository itemRepository) : ICommand
             };
 
             var createdItem = await itemRepository.CreateAsync(item);
+            await itemRepository.UnitOfWork.SaveChangesAsync();
             return Result.Success(createdItem);
         }
         catch (Exception ex)

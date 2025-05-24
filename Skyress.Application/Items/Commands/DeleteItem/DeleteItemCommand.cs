@@ -19,6 +19,7 @@ public class DeleteItemCommandHandler(IItemRepository itemRepository) : ICommand
             }
 
             await itemRepository.DeleteByIdAsync(request.Id);
+            await itemRepository.UnitOfWork.SaveChangesAsync();
             return Result.Success();
         }
         catch (Exception ex)

@@ -43,7 +43,6 @@ namespace Skyress.Infrastructure.Repository
         public async Task<T> CreateAsync(T entity)
         {
             var savedEntity = await this.dbSet.AddAsync(entity);
-            await this.skyressDbContext.SaveChangesAsync();
             return savedEntity.Entity;
         }
 
@@ -57,11 +56,12 @@ namespace Skyress.Infrastructure.Repository
             if (entity is ISoftDeletable softDeletable)
             {
                 softDeletable.IsDeleted = true;
-                await this.skyressDbContext.SaveChangesAsync();
                 return;
             }
-            await this.HardDeleteAsync(entity);
+            this.HardDeleteAsync(entity);
         }
+
+        public IUnitOfWork UnitOfWork => this.skyressDbContext;
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
@@ -73,17 +73,15 @@ namespace Skyress.Infrastructure.Repository
             return await GetAsync(predicate: t => t.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<T> UpdateAsync(T entity)
+        public T UpdateAsync(T entity)
         {
             this.skyressDbContext.Entry(entity).State = EntityState.Modified;
-            await this.skyressDbContext.SaveChangesAsync();
             return entity;
         }
 
-        private async Task HardDeleteAsync(T entity)
+        private void HardDeleteAsync(T entity)
         {
             this.dbSet.Remove(entity);
-            await this.skyressDbContext.SaveChangesAsync();
         }
     }
 }

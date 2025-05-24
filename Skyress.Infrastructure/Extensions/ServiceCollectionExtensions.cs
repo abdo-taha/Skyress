@@ -21,7 +21,6 @@ namespace Skyress.Infrastructure.Extensions
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ITagAssignmentRepository, TagAssignmentRepository>();
             services.AddScoped<ITodoRepository, TodoRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
     }
