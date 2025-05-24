@@ -29,7 +29,7 @@ public static class ItemsApi
 
         api.MapGet("{id:long}", GetItemByIdAsync);
         api.MapPost("/", CreateItemAsync);
-        api.MapPut("{id:long}", UpdateItemAsync);
+        api.MapPut("/", UpdateItemAsync);
         api.MapDelete("{id:long}", DeleteItemAsync);
 
         return api;
@@ -71,11 +71,11 @@ public static class ItemsApi
     }
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemAsync(
-        long id,
         UpdateItemCommand command,
         ISender sender)
     {
-        var result = await sender.Send(command with { Id = id });
+        var result = await sender.Send(command);
+        // var result = await sender.Send(command with { Id = id });
         return result.IsSuccess
             ? TypedResults.Ok(result.Value)
             : result.Error.Code == "UpdateItem.NotFound"

@@ -73,7 +73,7 @@ namespace Skyress.Infrastructure.Repository
             return await GetAsync(predicate: t => t.Id == id).FirstOrDefaultAsync();
         }
 
-        public T UpdateAsync(T entity)
+        public T Update(T entity)
         {
             this.skyressDbContext.Entry(entity).State = EntityState.Modified;
             return entity;

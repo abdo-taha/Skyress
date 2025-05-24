@@ -41,10 +41,10 @@ public class UpdateItemCommandHandler(IItemRepository itemRepository) : ICommand
             Unit = request.Unit ?? existingItem.Unit,
             IsDeleted = existingItem.IsDeleted,
             LastEditDate = DateTime.UtcNow,
-            CreaedAt = existingItem.CreaedAt
+            CreatedAt = existingItem.CreatedAt
         };
 
-        var updatedItem = itemRepository.UpdateAsync(item);
+        var updatedItem = itemRepository.Update(item);
         await itemRepository.UnitOfWork.SaveChangesAsync();
         return Result.Success(updatedItem);
     }

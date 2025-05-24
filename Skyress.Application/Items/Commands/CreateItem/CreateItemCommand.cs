@@ -32,7 +32,7 @@ public class CreateItemCommandHandler(IItemRepository itemRepository) : ICommand
             Unit = request.Unit,
             IsDeleted = false,
             LastEditDate = DateTime.UtcNow,
-            CreaedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow
         };
 
         var createdItem = await itemRepository.CreateAsync(item);
