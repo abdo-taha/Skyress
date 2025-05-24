@@ -17,5 +17,5 @@ public sealed class Customer : AggregateRoot, IAuditable, ISoftDeletable
 
     public DateTime LastEditDate { get; set; }
 
-    public DateTime CreaedAt { get; init; }
+    public DateTime CreatedAt { get; init; }
 }

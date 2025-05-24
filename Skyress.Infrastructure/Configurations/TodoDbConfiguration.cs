@@ -24,7 +24,7 @@ namespace Skyress.Infrastructure.Configurations
             builder.Property(t => t.LastEditDate)
                 .IsRequired();
 
-            builder.Property(t => t.CreaedAt)
+            builder.Property(t => t.CreatedAt)
                 .IsRequired()
                 .ValueGeneratedOnAdd();
         }

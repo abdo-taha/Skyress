@@ -12,7 +12,7 @@ namespace Skyress.Domain.Aggregates.Invoice
 
         public DateTime LastEditDate { get; set; }
 
-        public DateTime CreaedAt { get; init; }
+        public DateTime CreatedAt { get; init; }
 
         public bool IsDeleted { get; set; }
     }

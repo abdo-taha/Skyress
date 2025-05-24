@@ -43,7 +43,7 @@ namespace Skyress.Infrastructure.Configurations
             builder.Property(s => s.LastEditDate)
                 .IsRequired();
 
-            builder.Property(s => s.CreaedAt)
+            builder.Property(s => s.CreatedAt)
                 .IsRequired()
                 .ValueGeneratedOnAdd();
         }

@@ -28,6 +28,6 @@ namespace Skyress.Domain.Aggregates.Item
 
         public DateTime LastEditDate { get; set; }
 
-        public DateTime CreaedAt { get; init; }
+        public DateTime CreatedAt { get; init; }
     }
 }
