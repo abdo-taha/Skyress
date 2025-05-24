@@ -10,10 +10,20 @@ public class Tag : AggregateRoot, ISoftDeletable
         Name = name;
         Type = type;
     }
-
-    public bool IsDeleted { get; set; }
-
+    
     public string Name { get; set; }
 
     public TagType Type { get; set; }
+    
+    public bool IsDeleted { get; private set; }
+
+    public void SoftDelete()
+    {
+        IsDeleted = true;
+    }
+
+    public void UnDelete()
+    {
+        IsDeleted = false;
+    }
 }

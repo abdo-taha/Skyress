@@ -13,10 +13,21 @@ namespace Skyress.Domain.Aggregates.Item
         public int QuantitySold { get; private set; }
         public string? QrCode { get; private set; }
         public Unit Unit { get; private set; }
-        public bool IsDeleted { get; private set; }
         public string? LastEditBy { get; private set; }
         public DateTime LastEditDate { get; private set; }
         public DateTime CreatedAt { get; init; }
+        
+        public bool IsDeleted { get; private set; }
+
+        public void SoftDelete()
+        {
+            IsDeleted = true;
+        }
+
+        public void UnDelete()
+        {
+            IsDeleted = false;
+        }
         
         private Item() { }
 
@@ -108,18 +119,6 @@ namespace Skyress.Domain.Aggregates.Item
             QuantityLeft -= quantity;
             QuantitySold += quantity;
             UpdateLastEditDate();
-        }
-
-        public void SoftDelete(string? deletedBy = null)
-        {
-            IsDeleted = true;
-            UpdateLastEditDate(deletedBy);
-        }
-
-        public void Restore(string? restoredBy = null)
-        {
-            IsDeleted = false;
-            UpdateLastEditDate(restoredBy);
         }
     }
 }

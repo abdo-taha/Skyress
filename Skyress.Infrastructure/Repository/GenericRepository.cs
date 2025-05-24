@@ -8,13 +8,13 @@ namespace Skyress.Infrastructure.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : AggregateRoot
     {
-        protected readonly SkyressDbContext skyressDbContext;
-        protected readonly DbSet<T> dbSet;
+        protected readonly SkyressDbContext SkyressDbContext;
+        protected readonly DbSet<T> DbSet;
 
         protected GenericRepository(SkyressDbContext skyressDbContext)
         {
-            this.skyressDbContext = skyressDbContext;
-            this.dbSet = skyressDbContext.Set<T>();
+            this.SkyressDbContext = skyressDbContext;
+            this.DbSet = skyressDbContext.Set<T>();
         }
 
         public IQueryable<T> GetAsync(
@@ -23,7 +23,7 @@ namespace Skyress.Infrastructure.Repository
             List<Expression<Func<T, object>>>? includes = null,
             bool disableTracking = false)
         {
-            IQueryable<T> query = dbSet;
+            IQueryable<T> query = DbSet;
 
             if (disableTracking)
                 query = query.AsNoTracking();
@@ -42,7 +42,7 @@ namespace Skyress.Infrastructure.Repository
 
         public async Task<T> CreateAsync(T entity)
         {
-            var savedEntity = await this.dbSet.AddAsync(entity);
+            var savedEntity = await this.DbSet.AddAsync(entity);
             return savedEntity.Entity;
         }
 
@@ -55,13 +55,13 @@ namespace Skyress.Infrastructure.Repository
             }
             if (entity is ISoftDeletable softDeletable)
             {
-                softDeletable.IsDeleted = true;
+                softDeletable.SoftDelete();
                 return;
             }
             this.HardDeleteAsync(entity);
         }
 
-        public IUnitOfWork UnitOfWork => this.skyressDbContext;
+        public IUnitOfWork UnitOfWork => this.SkyressDbContext;
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
@@ -73,15 +73,9 @@ namespace Skyress.Infrastructure.Repository
             return await GetAsync(predicate: t => t.Id == id).FirstOrDefaultAsync();
         }
 
-        public T Update(T entity)
-        {
-            this.skyressDbContext.Entry(entity).State = EntityState.Modified;
-            return entity;
-        }
-
         private void HardDeleteAsync(T entity)
         {
-            this.dbSet.Remove(entity);
+            this.DbSet.Remove(entity);
         }
     }
 }

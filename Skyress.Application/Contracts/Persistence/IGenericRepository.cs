@@ -12,8 +12,6 @@ namespace Skyress.Application.Contracts.Persistence
 
         public Task<T> CreateAsync(T entity);
 
-        public T Update(T entity);
-
         public Task DeleteByIdAsync(long id);
 
         public IQueryable<T> GetAsync(

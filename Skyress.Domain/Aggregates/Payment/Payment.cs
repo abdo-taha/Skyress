@@ -15,11 +15,21 @@ public class Payment : AggregateRoot, IAuditable, ISoftDeletable
 
     public decimal TotalDue { get; set; }
 
-    public bool IsDeleted { get; set; }
-
     public string? LastEditBy { get; set; }
 
     public DateTime LastEditDate { get; set; }
 
     public DateTime CreatedAt { get; init; }
+    
+    public bool IsDeleted { get; private set; }
+
+    public void SoftDelete()
+    {
+        IsDeleted = true;
+    }
+
+    public void UnDelete()
+    {
+        IsDeleted = false;
+    }
 }

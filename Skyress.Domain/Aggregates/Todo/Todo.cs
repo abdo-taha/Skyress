@@ -15,5 +15,15 @@ public class Todo : AggregateRoot, IAuditable, ISoftDeletable
 
     public DateTime CreatedAt { get; init; }
 
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
+
+    public void SoftDelete()
+    {
+        IsDeleted = true;
+    }
+
+    public void UnDelete()
+    {
+        IsDeleted = false;
+    }
 }

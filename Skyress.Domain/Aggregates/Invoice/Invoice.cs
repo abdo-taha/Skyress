@@ -14,6 +14,16 @@ namespace Skyress.Domain.Aggregates.Invoice
 
         public DateTime CreatedAt { get; init; }
 
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; private set; }
+
+        public void SoftDelete()
+        {
+            IsDeleted = true;
+        }
+
+        public void UnDelete()
+        {
+            IsDeleted = false;
+        }
     }
 }
