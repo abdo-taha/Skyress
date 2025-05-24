@@ -41,27 +41,27 @@ namespace Skyress.Infrastructure.Persistence
             base.OnModelCreating(modelBuilder);
         }
 
-        public async Task<int> SaveChangesAsync()
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return await base.SaveChangesAsync();
+            return await base.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task BeginTransactionAsync()
+        public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
             if (_transaction != null) return;
-            _transaction = await base.Database.BeginTransactionAsync();
+            _transaction = await base.Database.BeginTransactionAsync(cancellationToken);
         }
 
-        public async Task CommitTransactionAsync()
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                await SaveChangesAsync();
-                await _transaction?.CommitAsync()!;
+                await SaveChangesAsync(cancellationToken);
+                await _transaction?.CommitAsync(cancellationToken)!;
             }
             catch
             {
-                await RollbackTransactionAsync();
+                await RollbackTransactionAsync(cancellationToken);
                 throw;
             }
             finally
@@ -74,11 +74,11 @@ namespace Skyress.Infrastructure.Persistence
             }
         }
 
-        public async Task RollbackTransactionAsync()
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                await _transaction?.RollbackAsync()!;
+                await _transaction?.RollbackAsync(cancellationToken)!;
             }
             finally
             {

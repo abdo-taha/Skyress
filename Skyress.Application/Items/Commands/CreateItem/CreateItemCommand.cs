@@ -10,33 +10,28 @@ public record CreateItemCommand(
     string Name,
     string Description,
     double Price,
+    Unit Unit,
     double? CostPrice,
     int QuantityLeft,
-    string? QrCode,
-    Unit Unit) : ICommand<Item>;
+    string? QrCode) : ICommand<Item>;
 
-// todo move to file
 public class CreateItemCommandHandler(IItemRepository itemRepository) : ICommandHandler<CreateItemCommand, Item>
 {
     public async Task<Result<Item>> Handle(CreateItemCommand request, CancellationToken cancellationToken)
     {
-        var item = new Item
-        {
-            Name = request.Name,
-            Description = request.Description,
-            Price = request.Price,
-            CostPrice = request.CostPrice,
-            QuantityLeft = request.QuantityLeft,
-            QuantitySold = 0,
-            QrCode = request.QrCode,
-            Unit = request.Unit,
-            IsDeleted = false,
-            LastEditDate = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow
-        };
+
+        var item = Item.Create(
+            request.Name,
+            request.Description,
+            request.Price,
+            request.Unit,
+            request.QuantityLeft,
+            request.CostPrice,
+            request.QrCode
+        );
 
         var createdItem = await itemRepository.CreateAsync(item);
-        await itemRepository.UnitOfWork.SaveChangesAsync();
+        await itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(createdItem);
     }
-} 
+}
