@@ -1,13 +1,12 @@
-# infrastructure
-
-## migration
-open terminal in this folder and run :
+# Infrastructure
+## Migration
+Open terminal in this folder and run:
 ```sh
-cd .\Shop.Infrastructure\
-dotnet ef migrations add {MigrationName} -s ..\shop\Shop.API.csproj
+cd .\Skyress.Infrastructure\
+dotnet ef migrations add {MigrationName} -s ..\Skyress.API\Skyress.API.csproj
 ```
 
 ## update database
 ```sh
- dotnet ef database update -s ..\shop\Shop.API.csproj
+ dotnet ef database update -s ..\Skyress.API\Skyress.API.csproj
 ```
