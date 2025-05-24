@@ -18,6 +18,7 @@ namespace Skyress.Application.Contracts.Persistence
             Expression<Func<T, bool>>? predicate = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             List<Expression<Func<T, object>>>? includes = null,
-            bool disableTracking = false);
+            bool disableTracking = false,
+             bool includeDeleted = false);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.primitives;
 using Skyress.Infrastructure.Persistence;
@@ -21,7 +21,8 @@ namespace Skyress.Infrastructure.Repository
             Expression<Func<T, bool>>? predicate = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             List<Expression<Func<T, object>>>? includes = null,
-            bool disableTracking = false)
+            bool disableTracking = false,
+            bool includeDeleted = false)
         {
             IQueryable<T> query = DbSet;
 
@@ -32,7 +33,15 @@ namespace Skyress.Infrastructure.Repository
                 query = includes.Aggregate(query, (current, include) => current.Include(include));
 
             if (predicate != null)
+            {
                 query = query.Where(predicate);
+            }
+            
+            if (!includeDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
+            {
+                Expression<Func<T, bool>> notDeleted = t => !((ISoftDeletable)t).IsDeleted;
+                query = query.Where(notDeleted);
+            }
 
             if (orderBy != null)
                 query = orderBy(query);
