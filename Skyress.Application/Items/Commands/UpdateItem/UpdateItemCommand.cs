@@ -22,37 +22,30 @@ public class UpdateItemCommandHandler(IItemRepository itemRepository) : ICommand
 {
     public async Task<Result<Item>> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
     {
-        try
+        var existingItem = await itemRepository.GetByIdAsync(request.Id);
+        if (existingItem is null)
         {
-            var existingItem = await itemRepository.GetByIdAsync(request.Id);
-            if (existingItem is null)
-            {
-                return Result<Item>.Failure(new Error("UpdateItem.NotFound", "Item not found"));
-            }
-
-            var item = new Item
-            {
-                Id = request.Id,
-                Name = request.Name ?? existingItem.Name,
-                Description = request.Description ?? existingItem.Description,
-                Price = request.Price ?? existingItem.Price,
-                CostPrice = request.CostPrice ?? existingItem.CostPrice,
-                QuantityLeft = request.QuantityLeft ?? existingItem.QuantityLeft,
-                QuantitySold = existingItem.QuantitySold,
-                QrCode = request.QrCode ?? existingItem.QrCode,
-                Unit = request.Unit ?? existingItem.Unit,
-                IsDeleted = existingItem.IsDeleted,
-                LastEditDate = DateTime.UtcNow,
-                CreaedAt = existingItem.CreaedAt
-            };
-
-            var updatedItem = itemRepository.UpdateAsync(item);
-            await itemRepository.UnitOfWork.SaveChangesAsync();
-            return Result.Success(updatedItem);
+            return Result<Item>.Failure(new Error("UpdateItem.NotFound", "Item not found"));
         }
-        catch (Exception ex)
+
+        var item = new Item
         {
-            return Result<Item>.Failure(new Error("UpdateItem.Error", ex.Message));
-        }
+            Id = request.Id,
+            Name = request.Name ?? existingItem.Name,
+            Description = request.Description ?? existingItem.Description,
+            Price = request.Price ?? existingItem.Price,
+            CostPrice = request.CostPrice ?? existingItem.CostPrice,
+            QuantityLeft = request.QuantityLeft ?? existingItem.QuantityLeft,
+            QuantitySold = existingItem.QuantitySold,
+            QrCode = request.QrCode ?? existingItem.QrCode,
+            Unit = request.Unit ?? existingItem.Unit,
+            IsDeleted = existingItem.IsDeleted,
+            LastEditDate = DateTime.UtcNow,
+            CreaedAt = existingItem.CreaedAt
+        };
+
+        var updatedItem = itemRepository.UpdateAsync(item);
+        await itemRepository.UnitOfWork.SaveChangesAsync();
+        return Result.Success(updatedItem);
     }
 } 

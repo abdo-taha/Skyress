@@ -10,21 +10,14 @@ public class DeleteItemCommandHandler(IItemRepository itemRepository) : ICommand
 {
     public async Task<Result> Handle(DeleteItemCommand request, CancellationToken cancellationToken)
     {
-        try
+        var item = await itemRepository.GetByIdAsync(request.Id);
+        if (item is null)
         {
-            var item = await itemRepository.GetByIdAsync(request.Id);
-            if (item is null)
-            {
-                return Result.Failure(new Error("DeleteItem.NotFound", "Item not found"));
-            }
+            return Result.Failure(new Error("DeleteItem.NotFound", "Item not found"));
+        }
 
-            await itemRepository.DeleteByIdAsync(request.Id);
-            await itemRepository.UnitOfWork.SaveChangesAsync();
-            return Result.Success();
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure(new Error("DeleteItem.Error", ex.Message));
-        }
+        await itemRepository.DeleteByIdAsync(request.Id);
+        await itemRepository.UnitOfWork.SaveChangesAsync();
+        return Result.Success();
     }
 } 

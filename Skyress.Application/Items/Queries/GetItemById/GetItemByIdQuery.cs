@@ -13,19 +13,12 @@ public class GetItemByIdQueryHandler(IItemRepository itemRepository) : IQueryHan
 {
     public async Task<Result<Item>> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
     {
-        try
+        var item = await itemRepository.GetByIdAsync(request.Id);
+        if (item is null)
         {
-            var item = await itemRepository.GetByIdAsync(request.Id);
-            if (item is null)
-            {
-                return Result<Item>.Failure(new Error("GetItemById.NotFound", "Item not found"));
-            }
+            return Result<Item>.Failure(new Error("GetItemById.NotFound", "Item not found"));
+        }
 
-            return Result.Success(item);
-        }
-        catch (Exception ex)
-        {
-            return Result<Item>.Failure(new Error("GetItemById.Error", ex.Message));
-        }
+        return Result.Success(item);
     }
 } 

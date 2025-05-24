@@ -20,31 +20,23 @@ public class CreateItemCommandHandler(IItemRepository itemRepository) : ICommand
 {
     public async Task<Result<Item>> Handle(CreateItemCommand request, CancellationToken cancellationToken)
     {
-        try
+        var item = new Item
         {
-            var item = new Item
-            {
-                Name = request.Name,
-                Description = request.Description,
-                Price = request.Price,
-                CostPrice = request.CostPrice,
-                QuantityLeft = request.QuantityLeft,
-                QuantitySold = 0,
-                QrCode = request.QrCode,
-                Unit = request.Unit,
-                IsDeleted = false,
-                LastEditDate = DateTime.UtcNow,
-                CreaedAt = DateTime.UtcNow
-            };
+            Name = request.Name,
+            Description = request.Description,
+            Price = request.Price,
+            CostPrice = request.CostPrice,
+            QuantityLeft = request.QuantityLeft,
+            QuantitySold = 0,
+            QrCode = request.QrCode,
+            Unit = request.Unit,
+            IsDeleted = false,
+            LastEditDate = DateTime.UtcNow,
+            CreaedAt = DateTime.UtcNow
+        };
 
-            var createdItem = await itemRepository.CreateAsync(item);
-            await itemRepository.UnitOfWork.SaveChangesAsync();
-            return Result.Success(createdItem);
-        }
-        catch (Exception ex)
-        {
-            // todo add errors
-            return Result<Item>.Failure(new Error("CreateItem.Error", ex.Message));
-        }
+        var createdItem = await itemRepository.CreateAsync(item);
+        await itemRepository.UnitOfWork.SaveChangesAsync();
+        return Result.Success(createdItem);
     }
 } 
