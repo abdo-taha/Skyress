@@ -1,6 +1,6 @@
 using Skyress.API.Extenstions;
 using Serilog;
-using Skyress.API.Endpoints;
+using Skyress.API.Endpoints.Items;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
