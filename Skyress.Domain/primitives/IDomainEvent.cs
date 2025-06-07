@@ -1,6 +1,8 @@
 ﻿namespace Skyress.Domain.primitives;
 
-public interface IDomainEvent
+using MediatR;
+
+public interface IDomainEvent : INotification
 {
-    public long Id { get; init; }
+    public Guid Id { get; init; }
 }

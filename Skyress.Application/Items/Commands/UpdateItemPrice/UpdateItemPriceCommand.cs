@@ -7,7 +7,7 @@ using Skyress.Domain.Common;
 
 public record UpdateItemPriceCommand(
     long Id,
-    double Price) : ICommand<Item>;
+    decimal Price) : ICommand<Item>;
 
 public class UpdateItemPriceCommandHandler : ICommandHandler<UpdateItemPriceCommand, Item>
 {

@@ -27,7 +27,7 @@ namespace Skyress.Infrastructure.Configurations
                 .IsRequired()
                 .HasColumnType("decimal(18,2)");
 
-            builder.Property(p => p.pricingChangeType)
+            builder.Property(p => p.PricingChangeType)
                 .IsRequired();
 
             builder.Property(p => p.LastEditBy)

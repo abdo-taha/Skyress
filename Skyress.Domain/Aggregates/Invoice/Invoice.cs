@@ -4,7 +4,7 @@ namespace Skyress.Domain.Aggregates.Invoice
 {
     public class Invoice : AggregateRoot, ISoftDeletable, IAuditable
     {
-        public double TotalAmount { get; set; }
+        public decimal TotalAmount { get; set; }
 
         public long? CustomerId { get; set; }
 

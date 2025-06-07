@@ -5,9 +5,9 @@ namespace Skyress.API.DTOs.Items;
 public record CreateItemRequest(
     string Name,
     string Description,
-    double Price,
+    decimal Price,
     Unit Unit,
     int QuantityLeft = 0,
-    double? CostPrice = null,
+    decimal? CostPrice = null,
     string? QrCode = null
 );

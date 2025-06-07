@@ -1,3 +1,3 @@
 namespace Skyress.API.DTOs.Items;
 
-public record UpdateItemCostPriceRequest(double? CostPrice);
+public record UpdateItemCostPriceRequest(decimal CostPrice);

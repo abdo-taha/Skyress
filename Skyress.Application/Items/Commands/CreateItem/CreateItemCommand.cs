@@ -9,9 +9,9 @@ using Skyress.Domain.Enums;
 public record CreateItemCommand(
     string Name,
     string Description,
-    double Price,
+    decimal Price,
     Unit Unit,
-    double? CostPrice,
+    decimal? CostPrice,
     int QuantityLeft,
     string? QrCode) : ICommand<Item>;
 

@@ -1,14 +1,18 @@
 ﻿using Skyress.Domain.Enums;
 using Skyress.Domain.primitives;
+using Skyress.Domain.Aggregates.Item.Events;
 
 namespace Skyress.Domain.Aggregates.Item
 {
     public class Item : AggregateRoot, ISoftDeletable, IAuditable
     {
+        private readonly List<PricingHistory> _pricingHistory = new();
+        public IReadOnlyCollection<PricingHistory> PricingHistory => _pricingHistory.AsReadOnly();
+
         public string? Name { get; private set; }
         public string? Description { get; private set; }
-        public double Price { get; private set; }
-        public double? CostPrice { get; private set; }
+        public decimal Price { get; private set; }
+        public decimal? CostPrice { get; private set; }
         public int QuantityLeft { get; private set; }
         public int QuantitySold { get; private set; }
         public string? QrCode { get; private set; }
@@ -34,10 +38,10 @@ namespace Skyress.Domain.Aggregates.Item
         public static Item Create(
             string name,
             string description,
-            double price,
+            decimal price,
             Unit unit,
             int quantityLeft = 0,
-            double? costPrice = null,
+            decimal? costPrice = null,
             string? qrCode = null,
             string? createdBy = null)
         {
@@ -80,13 +84,20 @@ namespace Skyress.Domain.Aggregates.Item
             UpdateLastEditDate(editedBy);
         }
 
-        public void UpdatePrice(double price, string? editedBy = null)
+        public void UpdatePrice(decimal newPrice,PricingChangeType pricingChangeType = PricingChangeType.PriceChange, string? editedBy = null)
         {
-            Price = price;
+            decimal oldPrice = Price;
+            Price = newPrice;
+            RaiseDomainEvent(new ItemPriceChangedDomainEvent(Guid.NewGuid(), Id, oldPrice, newPrice, CostPrice ?? 0M, CostPrice ?? 0M, pricingChangeType, editedBy, DateTime.UtcNow, DateTime.UtcNow));
             UpdateLastEditDate(editedBy);
         }
 
-        public void UpdateCostPrice(double? costPrice, string? editedBy = null)
+        public void AddPricingHistory(PricingHistory pricingHistory)
+        {
+            this._pricingHistory.Add(pricingHistory);
+        }
+
+        public void UpdateCostPrice(decimal? costPrice, string? editedBy = null)
         {
             CostPrice = costPrice;
             UpdateLastEditDate(editedBy);
