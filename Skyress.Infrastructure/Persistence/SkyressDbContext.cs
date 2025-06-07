@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Newtonsoft.Json;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Customer;
 using Skyress.Domain.Aggregates.Invoice;
@@ -9,6 +10,7 @@ using Skyress.Domain.Aggregates.Tag;
 using Skyress.Domain.Aggregates.TagAssignmnet;
 using Skyress.Domain.Aggregates.Todo;
 using Skyress.Domain.primitives;
+using Skyress.Infrastructure.outbox;
 
 namespace Skyress.Infrastructure.Persistence
 {
@@ -24,12 +26,13 @@ namespace Skyress.Infrastructure.Persistence
         internal DbSet<SoldItem> SoldItems { get; set; }
         internal DbSet<PricingHistory> PricingHistories { get; set; }
         internal DbSet<Installment> Installments { get; set; }
+        internal DbSet<OutboxMessage> OutboxMessages { get; set; }
         private IDbContextTransaction? _transaction;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes()
-                .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType)))
+                         .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType)))
             {
                 modelBuilder.Entity(entityType.ClrType)
                     .Property(nameof(BaseEntity.Id))
@@ -43,6 +46,7 @@ namespace Skyress.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            ConvertDomainEventsToOutboxMessage();
             return await base.SaveChangesAsync(cancellationToken);
         }
 
@@ -94,6 +98,32 @@ namespace Skyress.Infrastructure.Persistence
         {
             base.Dispose();
             _transaction?.Dispose();
+        }
+
+        private void ConvertDomainEventsToOutboxMessage()
+        {
+            var messages = base.ChangeTracker.Entries<AggregateRoot>()
+                .Select(e => e.Entity)
+                .SelectMany(aggregateRoot =>
+                {
+                    var events = aggregateRoot.GetDomainEvents();
+                    aggregateRoot.ClearDomainEvents();
+                    return events;
+                }).Select(
+                    @event => new OutboxMessage()
+                {
+                    Id = Guid.NewGuid(),
+                    OccuredOnUtc = DateTime.UtcNow,
+                    Type = @event.GetType().Name,
+                    Content = JsonConvert.SerializeObject(
+                        @event,
+                        new JsonSerializerSettings()
+                        {
+                            TypeNameHandling = TypeNameHandling.All,
+                        })
+                }).ToList();
+            
+            base.Set<OutboxMessage>().AddRange(messages);
         }
     }
 }
