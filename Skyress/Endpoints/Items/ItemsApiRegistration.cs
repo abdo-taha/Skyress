@@ -22,6 +22,7 @@ public static class ItemsApiRegistration
         // Query endpoints
         api.MapGet("/", GetAllItemsEndpoint.GetAllItemsAsync);
         api.MapGet("{id:long}", GetItemByIdEndpoint.GetItemByIdAsync);
+        api.MapGet("/pricingHistory{id:long}", GetItemPricingHistoryEndpoint.GetItemPricingHistoryAsync);
         
         // Command endpoints
         api.MapPost("/", CreateItemEndpoint.CreateItemAsync);
@@ -31,8 +32,8 @@ public static class ItemsApiRegistration
         api.MapPatch("{id:long}/name", UpdateItemEndpoints.UpdateItemNameAsync);
         api.MapPatch("{id:long}/description", UpdateItemEndpoints.UpdateItemDescriptionAsync);
         api.MapPatch("{id:long}/price", UpdateItemEndpoints.UpdateItemPriceAsync);
-        api.MapPatch("{id:long}/costprice", UpdateItemEndpoints.UpdateItemCostPriceAsync);
-        api.MapPatch("{id:long}/quantityleft", UpdateItemEndpoints.UpdateItemQuantityLeftAsync);
+        api.MapPatch("{id:long}/costPrice", UpdateItemEndpoints.UpdateItemCostPriceAsync);
+        api.MapPatch("{id:long}/quantityLeft", UpdateItemEndpoints.UpdateItemQuantityLeftAsync);
         api.MapPatch("{id:long}/qrcode", UpdateItemEndpoints.UpdateItemQrCodeAsync);
         api.MapPatch("{id:long}/unit", UpdateItemEndpoints.UpdateItemUnitAsync);
     }
