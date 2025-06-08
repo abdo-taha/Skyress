@@ -1,12 +1,11 @@
-﻿using Asp.Versioning.ApiExplorer;
-using Microsoft.OpenApi.Models;
-using Skyress.API.OpenApi;
-
-namespace Skyress.API.Extenstions;
+﻿namespace Skyress.API.Extenstions;
 
 using Asp.Versioning;
 using Skyress.Infrastructure.Extensions;
 using Skyress.Application.Extensions;
+using Quartz;
+using Skyress.API.OpenApi;
+using Skyress.Infrastructure.BackGroundJobs;
 
 public static class DependencyInjection
 {
@@ -30,6 +29,18 @@ public static class DependencyInjection
             options.SubstituteApiVersionInUrl = true;
         });
         services.AddEndpointsApiExplorer();
+
+        services.AddQuartz(configure =>
+        {
+            var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+            configure.AddJob<ProcessOutboxMessagesJob>(jobKey)
+                .AddTrigger(trigger => trigger.ForJob(jobKey)
+                    .WithSimpleSchedule(schedule =>
+                        schedule.WithIntervalInSeconds(10)
+                            .RepeatForever()));
+        })
+        .AddQuartzHostedService();
+        
 
         return services;
     }
