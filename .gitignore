@@ -14,3 +14,4 @@
 /Skyress.Infrastructure/obj
 /Skyress.Domain/obj
 /Skyress.Domain/bin
+/.env
