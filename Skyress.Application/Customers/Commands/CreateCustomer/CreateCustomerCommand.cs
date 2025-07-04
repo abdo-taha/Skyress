@@ -20,8 +20,7 @@ public class CreateCustomerCommandHandler(ICustomerRepository customerRepository
         {
             Name = request.Name,
             Notes = request.Notes,
-            State = request.State,
-            CreatedAt = DateTime.UtcNow
+            State = request.State
         };
 
         var createdCustomer = await customerRepository.CreateAsync(customer);

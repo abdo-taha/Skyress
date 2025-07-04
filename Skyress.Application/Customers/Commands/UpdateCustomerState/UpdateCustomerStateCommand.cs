@@ -8,8 +8,7 @@ using Skyress.Domain.Enums;
 
 public record UpdateCustomerStateCommand(
     long Id,
-    CustomerState State,
-    string LastEditedBy) : ICommand<Customer>;
+    CustomerState State) : ICommand<Customer>;
 
 public class UpdateCustomerStateCommandHandler(ICustomerRepository customerRepository)
     : ICommandHandler<UpdateCustomerStateCommand, Customer>
@@ -23,8 +22,6 @@ public class UpdateCustomerStateCommandHandler(ICustomerRepository customerRepos
         }
 
         existingCustomer.State = request.State;
-        existingCustomer.LastEditDate = DateTime.UtcNow;
-        existingCustomer.LastEditBy = request.LastEditedBy;
         
         await customerRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(existingCustomer);

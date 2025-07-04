@@ -19,7 +19,7 @@ public class Installment : BaseEntity, ISoftDeletable, IAuditable
 
     public DateTime LastEditDate { get; set; }
 
-    public DateTime CreatedAt { get; init; }
+    public DateTime CreatedAt { get; set; }
 
     public bool IsDeleted { get; private set; }
 

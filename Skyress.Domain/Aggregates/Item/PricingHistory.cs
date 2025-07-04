@@ -17,11 +17,11 @@ public class PricingHistory : AggregateRoot, IAuditable
 
     public PricingChangeType PricingChangeType { get;  private set; }
 
-    public string? LastEditBy { get;  private set; }
+    public string? LastEditBy { get; set; }
 
-    public DateTime LastEditDate { get;  private set; }
+    public DateTime LastEditDate { get; set; }
 
-    public DateTime CreatedAt { get;  private set; }
+    public DateTime CreatedAt { get; set; }
     
     public PricingHistory(
         long itemId,
@@ -29,10 +29,7 @@ public class PricingHistory : AggregateRoot, IAuditable
         decimal newPrice,
         decimal oldCost,
         decimal newCost,
-        PricingChangeType pricingChangeType,
-        string? lastEditBy,
-        DateTime lastEditDate,
-        DateTime createdAt)
+        PricingChangeType pricingChangeType)
     {
         ItemId = itemId;
         OldPrice = oldPrice;
@@ -40,8 +37,5 @@ public class PricingHistory : AggregateRoot, IAuditable
         OldCost = oldCost;
         NewCost = newCost;
         PricingChangeType = pricingChangeType;
-        LastEditBy = lastEditBy;
-        LastEditDate = lastEditDate;
-        CreatedAt = createdAt;
     }
 }

@@ -9,7 +9,7 @@ namespace Skyress.API.Endpoints.Customers;
 public static class CreateCustomerEndpoint
 {
     public static async Task<Results<Created<Customer>, BadRequest<string>>> CreateCustomerAsync(
-        [AsParameters] CreateCustomerRequest request,
+        CreateCustomerRequest request,
         HttpContext httpContext,
         ISender sender)
     {

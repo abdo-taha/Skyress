@@ -2,9 +2,9 @@
 
 public interface IAuditable
 {
-    public string? LastEditBy { get;}
+    public string? LastEditBy { get; set; }
 
-    public DateTime LastEditDate { get;}
+    public DateTime LastEditDate { get; set; }
 
-    public DateTime CreatedAt { get;}
+    public DateTime CreatedAt { get; set; }
 }

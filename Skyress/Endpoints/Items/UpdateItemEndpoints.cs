@@ -16,7 +16,7 @@ public static class UpdateItemEndpoints
 {
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemNameAsync(
         long id,
-        [AsParameters] UpdateItemNameRequest request,
+        UpdateItemNameRequest request,
         ISender sender)
     {
         var command = new UpdateItemNameCommand(id, request.Name);
@@ -30,7 +30,7 @@ public static class UpdateItemEndpoints
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemDescriptionAsync(
         long id,
-        [AsParameters] UpdateItemDescriptionRequest request,
+        UpdateItemDescriptionRequest request,
         ISender sender)
     {
         var command = new UpdateItemDescriptionCommand(id, request.Description);
@@ -44,7 +44,7 @@ public static class UpdateItemEndpoints
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemPriceAsync(
         long id,
-        [AsParameters] UpdateItemPriceRequest request,
+        UpdateItemPriceRequest request,
         ISender sender)
     {
         var command = new UpdateItemPriceCommand(id, request.Price);
@@ -58,7 +58,7 @@ public static class UpdateItemEndpoints
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemCostPriceAsync(
         long id,
-        [AsParameters] UpdateItemCostPriceRequest request,
+        UpdateItemCostPriceRequest request,
         ISender sender)
     {
         var command = new UpdateItemCostPriceCommand(id, request.CostPrice);
@@ -72,7 +72,7 @@ public static class UpdateItemEndpoints
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemQuantityLeftAsync(
         long id,
-        [AsParameters] UpdateItemQuantityLeftRequest request,
+        UpdateItemQuantityLeftRequest request,
         ISender sender)
     {
         var command = new UpdateItemQuantityLeftCommand(id, request.QuantityLeft);
@@ -86,7 +86,7 @@ public static class UpdateItemEndpoints
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemQrCodeAsync(
         long id,
-        [AsParameters] UpdateItemQrCodeRequest request,
+        UpdateItemQrCodeRequest request,
         ISender sender)
     {
         var command = new UpdateItemQrCodeCommand(id, request.QrCode);
@@ -100,7 +100,7 @@ public static class UpdateItemEndpoints
 
     public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemUnitAsync(
         long id,
-        [AsParameters] UpdateItemUnitRequest request,
+        UpdateItemUnitRequest request,
         ISender sender)
     {
         var command = new UpdateItemUnitCommand(id, request.Unit);

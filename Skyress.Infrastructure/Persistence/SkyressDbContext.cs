@@ -46,6 +46,7 @@ namespace Skyress.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            UpdateAudit();
             ConvertDomainEventsToOutboxMessage();
             return await base.SaveChangesAsync(cancellationToken);
         }
@@ -124,6 +125,20 @@ namespace Skyress.Infrastructure.Persistence
                 }).ToList();
             
             base.Set<OutboxMessage>().AddRange(messages);
+        }
+
+        private void UpdateAudit()
+        {
+            base.ChangeTracker.Entries<IAuditable>()
+                .Select(e => e.Entity)
+                .ToList()
+                .ForEach(e => { e.LastEditDate = DateTime.UtcNow;});
+            
+            base.ChangeTracker.Entries<IAuditable>()
+                .Where(e => e.State == EntityState.Added)
+                .Select(e => e.Entity)
+                .ToList()
+                .ForEach(e => { e.CreatedAt = DateTime.UtcNow;});
         }
     }
 }

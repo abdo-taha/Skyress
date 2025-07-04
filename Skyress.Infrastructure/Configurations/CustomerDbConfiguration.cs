@@ -30,8 +30,7 @@ namespace Skyress.Infrastructure.Configurations
                 .IsRequired();
 
             builder.Property(c => c.CreatedAt)
-                .IsRequired()
-                .ValueGeneratedOnAdd();
+                .IsRequired();
         }
     }
 } 

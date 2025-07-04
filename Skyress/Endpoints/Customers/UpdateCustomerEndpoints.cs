@@ -13,7 +13,7 @@ public static class UpdateCustomerEndpoints
         UpdateCustomerStateRequest request,
         ISender sender)
     {
-        var command = new UpdateCustomerStateCommand(request.Id, request.State, request.LastEditedBy);
+        var command = new UpdateCustomerStateCommand(request.Id, request.State);
         var result = await sender.Send(command);
         
         return result.IsSuccess
@@ -27,7 +27,7 @@ public static class UpdateCustomerEndpoints
         UpdateCustomerNotesRequest request,
         ISender sender)
     {
-        var command = new UpdateCustomerNotesCommand(request.Id, request.Notes, request.EditedBy);
+        var command = new UpdateCustomerNotesCommand(request.Id, request.Notes);
         var result = await sender.Send(command);
         
         return result.IsSuccess

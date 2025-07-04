@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Skyress.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Skyress.Infrastructure.Persistence;
 namespace Skyress.Infrastructure.Migrations
 {
     [DbContext(typeof(SkyressDbContext))]
-    partial class SkyressDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250704164031_RemoveCreatedAtDBGeneration")]
+    partial class RemoveCreatedAtDBGeneration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

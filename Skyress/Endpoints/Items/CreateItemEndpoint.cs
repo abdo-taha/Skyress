@@ -9,7 +9,7 @@ namespace Skyress.API.Endpoints.Items;
 public static class CreateItemEndpoint
 {
     public static async Task<Results<Ok<Item>, BadRequest<string>>> CreateItemAsync(
-        [AsParameters] CreateItemRequest request,
+        CreateItemRequest request,
         ISender sender)
     {
         var command = new CreateItemCommand(

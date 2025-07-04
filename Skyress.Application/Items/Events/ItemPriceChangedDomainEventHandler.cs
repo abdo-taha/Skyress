@@ -13,7 +13,7 @@ public class ItemPriceChangedDomainEventHandler(IItemRepository itemRepository)
         // this can be done during the update
         // it was a test for events flow
         var item = await itemRepository.GetByIdAsync(notification.ItemId);
-        item?.AddPricingHistory(new PricingHistory(notification.ItemId, notification.OldPrice, notification.NewPrice, notification.OldCost, notification.NewCost, notification.PricingChangeType, notification.LastEditBy, notification.LastEditDate, notification.CreatedAt));
+        item?.AddPricingHistory(new PricingHistory(notification.ItemId, notification.OldPrice, notification.NewPrice, notification.OldCost, notification.NewCost, notification.PricingChangeType));
         await itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
     }
 } 

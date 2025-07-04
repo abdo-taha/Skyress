@@ -17,9 +17,9 @@ namespace Skyress.Domain.Aggregates.Item
         public int QuantitySold { get; private set; }
         public string? QrCode { get; private set; }
         public Unit Unit { get; private set; }
-        public string? LastEditBy { get; private set; }
-        public DateTime LastEditDate { get; private set; }
-        public DateTime CreatedAt { get; init; }
+        public string? LastEditBy { get; set; }
+        public DateTime LastEditDate { get; set; }
+        public DateTime CreatedAt { get; set; }
         
         public bool IsDeleted { get; private set; }
 
@@ -42,8 +42,7 @@ namespace Skyress.Domain.Aggregates.Item
             Unit unit,
             int quantityLeft = 0,
             decimal? costPrice = null,
-            string? qrCode = null,
-            string? createdBy = null)
+            string? qrCode = null)
         {
             var item = new Item
             {
@@ -55,41 +54,26 @@ namespace Skyress.Domain.Aggregates.Item
                 QuantitySold = 0,
                 QrCode = qrCode,
                 Unit = unit,
-                IsDeleted = false,
-                CreatedAt = DateTime.UtcNow,
-                LastEditBy = createdBy,
+                IsDeleted = false
             };
-            item.UpdateLastEditDate();
             return item;
         }
 
-        private void UpdateLastEditDate(string? editedBy = null)
-        {
-            LastEditDate = DateTime.UtcNow;
-            if (editedBy != null)
-            {
-                LastEditBy = editedBy;
-            }
-        }
-
-        public void UpdateName(string name, string? editedBy = null)
+        public void UpdateName(string name)
         {
             Name = name;
-            UpdateLastEditDate(editedBy);
         }
 
-        public void UpdateDescription(string description, string? editedBy = null)
+        public void UpdateDescription(string description)
         {
             Description = description;
-            UpdateLastEditDate(editedBy);
         }
 
-        public void UpdatePrice(decimal newPrice,PricingChangeType pricingChangeType = PricingChangeType.PriceChange, string? editedBy = null)
+        public void UpdatePrice(decimal newPrice,PricingChangeType pricingChangeType = PricingChangeType.PriceChange)
         {
             decimal oldPrice = Price;
             Price = newPrice;
-            RaiseDomainEvent(new ItemPriceChangedDomainEvent(Guid.NewGuid(), Id, oldPrice, newPrice, CostPrice ?? 0M, CostPrice ?? 0M, pricingChangeType, editedBy, DateTime.UtcNow, DateTime.UtcNow));
-            UpdateLastEditDate(editedBy);
+            RaiseDomainEvent(new ItemPriceChangedDomainEvent(Guid.NewGuid(), Id, oldPrice, newPrice, CostPrice ?? 0M, CostPrice ?? 0M, pricingChangeType));
         }
 
         public void AddPricingHistory(PricingHistory pricingHistory)
@@ -97,28 +81,24 @@ namespace Skyress.Domain.Aggregates.Item
             this._pricingHistory.Add(pricingHistory);
         }
 
-        public void UpdateCostPrice(decimal? costPrice, string? editedBy = null)
+        public void UpdateCostPrice(decimal? costPrice)
         {
             CostPrice = costPrice;
-            UpdateLastEditDate(editedBy);
         }
 
-        public void UpdateQuantityLeft(int quantityLeft, string? editedBy = null)
+        public void UpdateQuantityLeft(int quantityLeft)
         {
             QuantityLeft = quantityLeft;
-            UpdateLastEditDate(editedBy);
         }
 
-        public void UpdateQrCode(string? qrCode, string? editedBy = null)
+        public void UpdateQrCode(string? qrCode)
         {
             QrCode = qrCode;
-            UpdateLastEditDate(editedBy);
         }
 
-        public void UpdateUnit(Unit unit, string? editedBy = null)
+        public void UpdateUnit(Unit unit)
         {
             Unit = unit;
-            UpdateLastEditDate(editedBy);
         }
 
         public void MarkAsSold(int quantity)
@@ -129,7 +109,6 @@ namespace Skyress.Domain.Aggregates.Item
             }
             QuantityLeft -= quantity;
             QuantitySold += quantity;
-            UpdateLastEditDate();
         }
     }
 }

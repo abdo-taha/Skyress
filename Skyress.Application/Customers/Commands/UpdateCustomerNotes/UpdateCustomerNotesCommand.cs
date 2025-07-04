@@ -7,8 +7,7 @@ using Skyress.Domain.Common;
 
 public record UpdateCustomerNotesCommand(
     long Id,
-    string Notes,
-    string? EditedBy = null) : ICommand<Customer>;
+    string Notes) : ICommand<Customer>;
 
 public class UpdateCustomerNotesCommandHandler(ICustomerRepository customerRepository)
     : ICommandHandler<UpdateCustomerNotesCommand, Customer>
@@ -22,8 +21,6 @@ public class UpdateCustomerNotesCommandHandler(ICustomerRepository customerRepos
         }
 
         existingCustomer.Notes = request.Notes;
-        existingCustomer.LastEditDate = DateTime.UtcNow;
-        existingCustomer.LastEditBy = request.EditedBy;
         
         await customerRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(existingCustomer);
