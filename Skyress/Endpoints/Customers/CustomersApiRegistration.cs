@@ -16,7 +16,7 @@ public static class CustomersApiRegistration
             .HasApiVersion(1.0)
             .ReportApiVersions()
             .Build();
-        var api = app.MapGroup("api/customers").WithApiVersionSet(versionSet);
+        var api = app.MapGroup("api/customers").WithApiVersionSet(versionSet).WithTags("Customers");
         
         // Query endpoints
         api.MapGet("/", GetAllCustomersEndpoint.GetAllCustomersAsync);

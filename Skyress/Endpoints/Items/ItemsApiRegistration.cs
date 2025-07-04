@@ -17,7 +17,7 @@ public static class ItemsApiRegistration
             .HasApiVersion(1.0)
             .ReportApiVersions()
             .Build();
-        var api = app.MapGroup("api/items").WithApiVersionSet(versionSet);
+        var api = app.MapGroup("api/items").WithApiVersionSet(versionSet).WithTags("Items");
         
         // Query endpoints
         api.MapGet("/", GetAllItemsEndpoint.GetAllItemsAsync);
@@ -44,7 +44,7 @@ public static class ItemsApiRegistration
             .HasApiVersion(2.0)
             .ReportApiVersions()
             .Build();
-        var api = app.MapGroup("api/items").WithApiVersionSet(versionSet);
+        var api = app.MapGroup("api/items").WithApiVersionSet(versionSet).WithTags("Items");
         api.MapGet("{id:long}", GetItemByIdEndpoint.GetItemByIdAsync);
     
         return api;
