@@ -4,6 +4,6 @@ namespace Skyress.API.DTOs.Customers;
 
 public record CreateCustomerRequest(
     string Name,
-    string Notes,
+    string Notes = "",
     CustomerState State = CustomerState.Active
 );
