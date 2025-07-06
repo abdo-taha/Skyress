@@ -4,6 +4,7 @@ using Skyress.API.Endpoints.Items;
 using Skyress.API.Endpoints.Customers;
 using Skyress.API.Endpoints.Invoices;
 using Skyress.API.Endpoints.Payments;
+using Skyress.API.Endpoints.Tags;
 using Skyress.API.Endpoints.Todos;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,7 @@ app.MapItemsApi();
 app.MapCustomersApi();
 app.MapInvoicesApi();
 app.MapPaymentsApi();
+app.MapTagsApi();
 app.MapTodosApi();
 
 
