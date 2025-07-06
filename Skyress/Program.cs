@@ -2,6 +2,7 @@ using Skyress.API.Extenstions;
 using Serilog;
 using Skyress.API.Endpoints.Items;
 using Skyress.API.Endpoints.Customers;
+using Skyress.API.Endpoints.Invoices;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -17,6 +18,7 @@ app.UseHttpsRedirection();
 
 app.MapItemsApi();
 app.MapCustomersApi();
+app.MapInvoicesApi();
 
 if (app.Environment.IsDevelopment())
 {

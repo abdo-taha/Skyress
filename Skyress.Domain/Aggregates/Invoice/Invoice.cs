@@ -1,4 +1,5 @@
-﻿using Skyress.Domain.primitives;
+using Skyress.Domain.Enums;
+using Skyress.Domain.primitives;
 
 namespace Skyress.Domain.Aggregates.Invoice
 {
@@ -7,6 +8,8 @@ namespace Skyress.Domain.Aggregates.Invoice
         public decimal TotalAmount { get; set; }
 
         public long? CustomerId { get; set; }
+        
+        public InvoiceState State { get; set; } = InvoiceState.Draft;
 
         public string? LastEditBy { get; set; }
 

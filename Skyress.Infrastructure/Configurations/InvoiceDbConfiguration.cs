@@ -13,6 +13,10 @@ namespace Skyress.Infrastructure.Configurations
                 .HasColumnType("decimal(18,2)");
 
             builder.Property(i => i.CustomerId);
+            
+            builder.Property(i => i.State)
+                .IsRequired()
+                .HasDefaultValue(Skyress.Domain.Enums.InvoiceState.Draft);
 
             builder.Property(i => i.LastEditBy)
                 .HasMaxLength(50);
@@ -27,4 +31,4 @@ namespace Skyress.Infrastructure.Configurations
                 .HasDefaultValue(false);
         }
     }
-} 
+}
