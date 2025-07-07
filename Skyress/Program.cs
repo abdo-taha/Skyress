@@ -6,6 +6,7 @@ using Skyress.API.Endpoints.Invoices;
 using Skyress.API.Endpoints.Payments;
 using Skyress.API.Endpoints.Tags;
 using Skyress.API.Endpoints.Todos;
+using Skyress.API.Endpoints.TagAssignments;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -25,6 +26,7 @@ app.MapInvoicesApi();
 app.MapPaymentsApi();
 app.MapTagsApi();
 app.MapTodosApi();
+app.MapTagAssignmentsApi();
 
 
 if (app.Environment.IsDevelopment())
