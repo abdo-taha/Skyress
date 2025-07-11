@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Skyress.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Skyress.Application.Contracts.Persistence;
@@ -21,6 +21,7 @@ namespace Skyress.Infrastructure.Extensions
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ITagAssignmentRepository, TagAssignmentRepository>();
             services.AddScoped<ITodoRepository, TodoRepository>();
+            services.AddScoped<IBasketRepository, BasketRepository>();
             return services;
         }
     }

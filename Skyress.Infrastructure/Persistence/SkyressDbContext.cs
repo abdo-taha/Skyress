@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Newtonsoft.Json;
 using Skyress.Application.Contracts.Persistence;
@@ -9,6 +9,7 @@ using Skyress.Domain.Aggregates.Payment;
 using Skyress.Domain.Aggregates.Tag;
 using Skyress.Domain.Aggregates.TagAssignmnet;
 using Skyress.Domain.Aggregates.Todo;
+using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.primitives;
 using Skyress.Infrastructure.outbox;
 
@@ -23,6 +24,8 @@ namespace Skyress.Infrastructure.Persistence
         internal DbSet<Tag> Tags { get; set; }
         internal DbSet<TagAssignment> TagAssignments { get; set; }
         internal DbSet<Todo> Todos { get; set; }
+        internal DbSet<Basket> Baskets { get; set; }
+        internal DbSet<BasketItem> BasketItems { get; set; }
         internal DbSet<SoldItem> SoldItems { get; set; }
         internal DbSet<PricingHistory> PricingHistories { get; set; }
         internal DbSet<Installment> Installments { get; set; }

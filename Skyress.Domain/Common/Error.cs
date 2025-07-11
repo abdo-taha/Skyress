@@ -3,6 +3,8 @@
 public class Error(string code, string message) : IEquatable<Error>
 {
     public static readonly Error None = new Error(string.Empty, string.Empty);
+    
+    public static readonly Error Dummy = new Error(string.Empty, string.Empty);
 
     public string Code { get; } = code;
     public string Message { get; } = message;
