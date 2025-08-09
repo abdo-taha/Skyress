@@ -25,7 +25,6 @@ public static class InvoicesApiRegistration
         api.MapGet("{id:long}/withPayments", GetInvoiceWithPaymentsEndpoint.GetInvoiceWithPaymentsAsync);
         
         // Command endpoints
-        api.MapPost("/", CreateInvoiceEndpoint.CreateInvoiceAsync);
         api.MapDelete("{id:long}", DeleteInvoiceEndpoint.DeleteInvoiceAsync);
 
         // Update endpoints

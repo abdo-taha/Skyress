@@ -8,7 +8,7 @@ namespace Skyress.Domain.Aggregates.Invoice
 
         public required string Name { get; set; }
 
-        public double Price { get; set; }
+        public decimal Price { get; set; }
 
         public int Quantity { get; set; }
 
@@ -20,7 +20,7 @@ namespace Skyress.Domain.Aggregates.Invoice
 
         public long? ItemId { get; set; }
 
-        public double ItemCost { get; set; }
+        public decimal? ItemCost { get; set; }
 
         public string? LastEditBy { get; set; }
 

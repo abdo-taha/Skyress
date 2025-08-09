@@ -9,7 +9,7 @@ namespace Skyress.Infrastructure.Repository;
 public class BasketRepository
     : GenericRepository<Basket>, IBasketRepository
 {
-    protected BasketRepository(SkyressDbContext skyressDbContext) : base(skyressDbContext)
+    public BasketRepository(SkyressDbContext skyressDbContext) : base(skyressDbContext)
     {
     }
 

@@ -8,7 +8,7 @@ using Skyress.Domain.Enums;
 
 public record CreateInvoiceCommand(
     long? CustomerId,
-    decimal TotalAmount) : ICommand<Invoice>;
+    InvoiceState State = InvoiceState.Issued) : ICommand<Invoice>;
 
 public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand, Invoice>
 {
@@ -24,8 +24,8 @@ public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand,
         var invoice = new Invoice
         {
             CustomerId = request.CustomerId,
-            TotalAmount = request.TotalAmount,
-            State = InvoiceState.Draft
+            TotalAmount = 0,
+            State = request.State,
         };
 
         var createdInvoice = await _invoiceRepository.CreateAsync(invoice);

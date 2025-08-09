@@ -19,6 +19,14 @@ namespace Skyress.Domain.Aggregates.Invoice
 
         public bool IsDeleted { get; private set; }
 
+        private readonly List<SoldItem> _soldItems = new();
+        public IReadOnlyCollection<SoldItem> SoldItems => _soldItems.AsReadOnly();
+
+        public void AddSoldItem(SoldItem soldItem)
+        {
+            _soldItems.Add(soldItem);
+        }
+
         public void SoftDelete()
         {
             IsDeleted = true;

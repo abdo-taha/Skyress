@@ -28,5 +28,10 @@ public static class BasketApiRegistration
         app.MapDelete("{id:long}", ClearBasketEndpoint.ClearBasketAsync);
 
         app.MapDelete("{id:long}/items", RemoveItemFromBasketEndpoint.RemoveItemFromBasketAsync);
+
+
+        app.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync);
+
+        app.MapPatch("checkout", CheckOutBasketEndpoint.CheckOutBasketAsync);
     }
 }

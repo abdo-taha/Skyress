@@ -45,6 +45,12 @@ namespace Skyress.Infrastructure.Configurations
 
             builder.Property(s => s.CreatedAt)
                 .IsRequired();
+
+            
+            builder.HasOne<Invoice>()
+                .WithMany(i => i.SoldItems)
+                .HasForeignKey(si => si.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 } 

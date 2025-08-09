@@ -10,6 +10,7 @@ using Skyress.Domain.Aggregates.Tag;
 using Skyress.Domain.Aggregates.TagAssignmnet;
 using Skyress.Domain.Aggregates.Todo;
 using Skyress.Domain.Aggregates.Basket;
+using Skyress.Domain.Aggregates.Idempotency;
 using Skyress.Domain.primitives;
 using Skyress.Infrastructure.outbox;
 
@@ -28,9 +29,11 @@ namespace Skyress.Infrastructure.Persistence
         internal DbSet<BasketItem> BasketItems { get; set; }
         internal DbSet<SoldItem> SoldItems { get; set; }
         internal DbSet<PricingHistory> PricingHistories { get; set; }
-        internal DbSet<Installment> Installments { get; set; }
-        internal DbSet<OutboxMessage> OutboxMessages { get; set; }
-        private IDbContextTransaction? _transaction;
+            internal DbSet<Installment> Installments { get; set; }
+    internal DbSet<OutboxMessage> OutboxMessages { get; set; }
+    internal DbSet<IdempotencyRecord> IdempotencyRecords { get; set; }
+    private IDbContextTransaction? _transaction;
+    private string? _transactionOwner;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,23 +52,40 @@ namespace Skyress.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            UpdateAudit();
+            UpdateAudit(); 
             ConvertDomainEventsToOutboxMessage();
+            if (_transaction != null)
+            {
+                return 0;
+            }
+
             return await base.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task<IDbContextTransaction> BeginTransactionAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            if (_transaction != null) return;
+            if (_transaction != null) 
+            {
+                return _transaction;
+            }
+            
             _transaction = await base.Database.BeginTransactionAsync(cancellationToken);
+            _transactionOwner = id.ToString();
+            return _transaction;
         }
 
-        public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+
+        public async Task CommitTransactionAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            if (_transaction == null ) throw new Exception("No active transaction");
+            if (_transaction == null || _transactionOwner != id.ToString()) return;
+            
             try
             {
-                await SaveChangesAsync(cancellationToken);
-                await _transaction?.CommitAsync(cancellationToken)!;
+                UpdateAudit();
+                ConvertDomainEventsToOutboxMessage();
+                await base.SaveChangesAsync(cancellationToken);
+                await _transaction.CommitAsync(cancellationToken);
             }
             catch
             {
@@ -78,6 +98,7 @@ namespace Skyress.Infrastructure.Persistence
                 {
                     await _transaction.DisposeAsync();
                     _transaction = null;
+                    _transactionOwner = null;
                 }
             }
         }
@@ -94,6 +115,7 @@ namespace Skyress.Infrastructure.Persistence
                 {
                     await _transaction.DisposeAsync();
                     _transaction = null;
+                    _transactionOwner = null;
                 }
             }
         }
