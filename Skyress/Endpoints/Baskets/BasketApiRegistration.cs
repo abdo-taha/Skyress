@@ -16,22 +16,22 @@ public static class BasketApiRegistration
             .Build();
         var api = app.MapGroup("api/baskets").WithApiVersionSet(versionSet).WithTags("Baskets");
 
-        app.MapPost("/", CreateBasketEndpoint.CreateBasketAsync);
+        api.MapPost("/", CreateBasketEndpoint.CreateBasketAsync);
 
-        app.MapGet("{id:long}", GetBasketByIdEndpoint.GetBasketByIdAsync);
+        api.MapGet("{id:long}", GetBasketByIdEndpoint.GetBasketByIdAsync);
 
-        app.MapPost("{id:long}/items", AddItemToBasketEndpoint.AddItemToBasketAsync);
+        api.MapPost("{id:long}/items", AddItemToBasketEndpoint.AddItemToBasketAsync);
 
-        app.MapGet("/customer/{customerId:long}", GetBasketsByCustomerEndpoint.GetBasketsByCustomerAsync);
-        app.MapGet("/state/{state}", GetBasketsByStateEndpoint.GetBasketsByStateAsync);
+        api.MapGet("/customer/{customerId:long}", GetBasketsByCustomerEndpoint.GetBasketsByCustomerAsync);
+        api.MapGet("/state/{state}", GetBasketsByStateEndpoint.GetBasketsByStateAsync);
 
-        app.MapDelete("{id:long}", ClearBasketEndpoint.ClearBasketAsync);
+        api.MapDelete("{id:long}", ClearBasketEndpoint.ClearBasketAsync);
 
-        app.MapDelete("{id:long}/items", RemoveItemFromBasketEndpoint.RemoveItemFromBasketAsync);
+        api.MapDelete("{id:long}/items", RemoveItemFromBasketEndpoint.RemoveItemFromBasketAsync);
 
 
-        app.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync);
+        api.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync);
 
-        app.MapPatch("checkout", CheckOutBasketEndpoint.CheckOutBasketAsync);
+        api.MapPatch("checkout", CheckOutBasketEndpoint.CheckOutBasketAsync);
     }
 }

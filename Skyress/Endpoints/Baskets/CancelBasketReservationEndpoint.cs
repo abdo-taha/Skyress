@@ -9,10 +9,10 @@ public static class CancelBasketReservationEndpoint
 {
     public static async Task<IResult> CancelBasketReservationAsync(
         ISender sender,
-        [FromBody] CancelBasketReservationRequest request,
+        [FromRoute] long id,
         CancellationToken cancellationToken)
     {
-        var command = new CancelBasketReservationCommand(request.BasketId);
+        var command = new CancelBasketReservationCommand(id);
         var result = await sender.Send(command, cancellationToken);
         
         return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Error);

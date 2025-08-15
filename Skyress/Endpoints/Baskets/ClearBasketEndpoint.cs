@@ -8,10 +8,10 @@ public static class ClearBasketEndpoint
 {
     public static async Task<IResult> ClearBasketAsync(
         ISender sender,
-        [FromRoute] long basketId,
+        [FromRoute] long id,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ClearBasketCommand(basketId), cancellationToken);
+        var result = await sender.Send(new ClearBasketCommand(id), cancellationToken);
         return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Error);
     }
 }
