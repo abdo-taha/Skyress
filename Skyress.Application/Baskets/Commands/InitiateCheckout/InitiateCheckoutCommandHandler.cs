@@ -43,6 +43,8 @@ public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateChe
 
             Payment payment = await CreatePaymentAsync(invoice, cancellationToken);
             
+            basket.AddPaymentId(payment.Id);
+            
             await _basketRepository.UnitOfWork.CommitTransactionAsync(transactionId, cancellationToken);
 
             return Result.Success(payment.Id);

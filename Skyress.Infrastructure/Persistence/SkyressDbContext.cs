@@ -10,7 +10,6 @@ using Skyress.Domain.Aggregates.Tag;
 using Skyress.Domain.Aggregates.TagAssignmnet;
 using Skyress.Domain.Aggregates.Todo;
 using Skyress.Domain.Aggregates.Basket;
-using Skyress.Domain.Aggregates.Idempotency;
 using Skyress.Domain.primitives;
 using Skyress.Infrastructure.outbox;
 
@@ -31,7 +30,6 @@ namespace Skyress.Infrastructure.Persistence
         internal DbSet<PricingHistory> PricingHistories { get; set; }
             internal DbSet<Installment> Installments { get; set; }
     internal DbSet<OutboxMessage> OutboxMessages { get; set; }
-    internal DbSet<IdempotencyRecord> IdempotencyRecords { get; set; }
     private IDbContextTransaction? _transaction;
     private string? _transactionOwner;
 
