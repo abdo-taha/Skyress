@@ -8,4 +8,6 @@ public interface IBasketRepository : IGenericRepository<Basket>
     Task<IReadOnlyList<Basket>> GetByCustomerIdAsync(long customerId);
     Task<IReadOnlyList<Basket>> GetByStateAsync(BasketState state);
     Task<Basket?> GetBasketWithItemsAsync(long basketId);
+    
+    Task<Basket?> GetBasketByPaymentIdAsync(long paymentId);
 }

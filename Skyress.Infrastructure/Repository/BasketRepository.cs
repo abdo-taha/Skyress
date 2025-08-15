@@ -29,4 +29,9 @@ public class BasketRepository
             .Include(b => b.BasketItems)
             .FirstOrDefaultAsync(b => b.Id == basketId);
     }
+
+    public async Task<Basket?> GetBasketByPaymentIdAsync(long paymentId)
+    {
+        return await SkyressDbContext.Baskets.FirstOrDefaultAsync( b => b.PaymentId == paymentId);
+    }
 }

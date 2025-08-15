@@ -22,6 +22,7 @@ public static class PaymentsApiRegistration
         api.MapGet("/invoice/{invoiceId:long}", GetPaymentsByInvoiceEndpoint.GetPaymentsByInvoiceAsync);
 
         api.MapPost("/", CreatePaymentEndpoint.CreatePaymentAsync);
+        api.MapPost("{id:long}/Pay", CompleteCashPaymentEndpoint.CompleteCashPaymentAsync);
         api.MapDelete("{id:long}", DeletePaymentEndpoint.DeletePaymentAsync);
     }
 }
