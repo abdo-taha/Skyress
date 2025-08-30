@@ -5,9 +5,9 @@ using Skyress.Domain.Common;
 
 namespace Skyress.Application.Baskets.Commands.CreateBasket;
 
-public record CreateBasketCommand(long CustomerId) : ICommand<Basket>;
+public record CreateBasketCommand(long? CustomerId) : ICommand<Basket>;
 
-public class CreateBasketCommandHandler(IBasketRepository basketRepository, ICustomerRepository customerRepository)
+public class CreateBasketCommandHandler(IBasketRepository basketRepository)
     : ICommandHandler<CreateBasketCommand, Basket>
 {
 
@@ -17,11 +17,6 @@ public class CreateBasketCommandHandler(IBasketRepository basketRepository, ICus
         {
             UserId = request.CustomerId,
         };
-        var customer = await customerRepository.GetByIdAsync(request.CustomerId);
-        if (customer == null)
-        {
-            return Result<Basket>.Failure(Error.Dummy);
-        }
         await basketRepository.CreateAsync(basket);
         
         await basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

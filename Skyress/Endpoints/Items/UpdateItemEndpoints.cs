@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Skyress.API.DTOs.Items;
-using Skyress.Application.Items.Commands.UpdateItemCostPrice;
 using Skyress.Application.Items.Commands.UpdateItemDescription;
 using Skyress.Application.Items.Commands.UpdateItemName;
 using Skyress.Application.Items.Commands.UpdateItemPrice;
@@ -47,21 +46,7 @@ public static class UpdateItemEndpoints
         UpdateItemPriceRequest request,
         ISender sender)
     {
-        var command = new UpdateItemPriceCommand(id, request.Price);
-        var result = await sender.Send(command);
-        return result.IsSuccess
-            ? TypedResults.Ok(result.Value)
-            : result.Error.Code.EndsWith(".NotFound")
-                ? TypedResults.NotFound()
-                : TypedResults.BadRequest(result.Error.Message);
-    }
-
-    public static async Task<Results<Ok<Item>, NotFound, BadRequest<string>>> UpdateItemCostPriceAsync(
-        long id,
-        UpdateItemCostPriceRequest request,
-        ISender sender)
-    {
-        var command = new UpdateItemCostPriceCommand(id, request.CostPrice);
+        var command = new UpdateItemPriceCommand(id, request.Price, request.CostPrice);
         var result = await sender.Send(command);
         return result.IsSuccess
             ? TypedResults.Ok(result.Value)

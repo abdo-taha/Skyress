@@ -8,7 +8,7 @@ namespace Skyress.API.Endpoints.Customers;
 
 public static class CreateCustomerEndpoint
 {
-    public static async Task<Results<Created<Customer>, BadRequest<string>>> CreateCustomerAsync(
+    public static async Task<Results<CreatedAtRoute<Customer>, BadRequest<string>>> CreateCustomerAsync(
         CreateCustomerRequest request,
         HttpContext httpContext,
         ISender sender)
@@ -23,7 +23,11 @@ public static class CreateCustomerEndpoint
         
         if (result.IsSuccess)
         {
-            return TypedResults.Created(result.Value.Name, result.Value);
+            return TypedResults.CreatedAtRoute<Customer>(
+                routeName: nameof(GetCustomerEndpoint),
+                routeValues: new { id = result.Value.Id },
+                value: result.Value
+            );
         }
         else
         {

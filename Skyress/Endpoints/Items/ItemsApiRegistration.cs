@@ -32,7 +32,6 @@ public static class ItemsApiRegistration
         api.MapPatch("{id:long}/name", UpdateItemEndpoints.UpdateItemNameAsync);
         api.MapPatch("{id:long}/description", UpdateItemEndpoints.UpdateItemDescriptionAsync);
         api.MapPatch("{id:long}/price", UpdateItemEndpoints.UpdateItemPriceAsync);
-        api.MapPatch("{id:long}/costPrice", UpdateItemEndpoints.UpdateItemCostPriceAsync);
         api.MapPatch("{id:long}/quantityLeft", UpdateItemEndpoints.UpdateItemQuantityLeftAsync);
         api.MapPatch("{id:long}/qrcode", UpdateItemEndpoints.UpdateItemQrCodeAsync);
         api.MapPatch("{id:long}/unit", UpdateItemEndpoints.UpdateItemUnitAsync);

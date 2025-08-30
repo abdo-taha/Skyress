@@ -21,17 +21,24 @@ public static class BasketApiRegistration
         api.MapGet("{id:long}", GetBasketByIdEndpoint.GetBasketByIdAsync);
 
         api.MapPost("{id:long}/items", AddItemToBasketEndpoint.AddItemToBasketAsync);
-
-        api.MapGet("/customer/{customerId:long}", GetBasketsByCustomerEndpoint.GetBasketsByCustomerAsync);
+        api.MapGet("/customer/{customerId:long?}", GetBasketsByCustomerEndpoint.GetBasketsByCustomerAsync).WithOpenApi(
+            op =>
+            {
+                op.Parameters[0].Required = false;
+                op.Parameters[0].AllowEmptyValue = true;
+                return op;
+            });
         api.MapGet("/state/{state}", GetBasketsByStateEndpoint.GetBasketsByStateAsync);
 
-        api.MapDelete("{id:long}", ClearBasketEndpoint.ClearBasketAsync);
+        api.MapPatch("{id:long}/clear", ClearBasketEndpoint.ClearBasketAsync);
+
+        api.MapDelete("{id:long}", DeleteBasketEndpoint.DeleteBasketAsync);
 
         api.MapDelete("{id:long}/items", RemoveItemFromBasketEndpoint.RemoveItemFromBasketAsync);
 
 
         api.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync);
 
-        api.MapPatch("checkout", CheckOutBasketEndpoint.CheckOutBasketAsync);
+        api.MapPatch("initiate-checkout", InitiateCheckoutBasketEndpoint.InitiateCheckoutBasketAsync);
     }
 }

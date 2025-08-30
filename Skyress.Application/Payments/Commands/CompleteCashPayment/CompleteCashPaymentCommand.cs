@@ -1,5 +1,8 @@
+using MediatR;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
+using Skyress.Application.Items.Commands.MarkItemsAsSold;
+using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
 
@@ -12,15 +15,17 @@ public class CompleteCashPaymentCommandHandler : ICommandHandler<CompleteCashPay
     private readonly IPaymentRepository _paymentRepository;
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IBasketRepository _basketRepository;
+    private readonly ISender _sender;
 
     public CompleteCashPaymentCommandHandler(
         IPaymentRepository paymentRepository,
         IInvoiceRepository invoiceRepository,
-        IBasketRepository basketRepository)
+        IBasketRepository basketRepository, ISender sender)
     {
         _paymentRepository = paymentRepository;
         _invoiceRepository = invoiceRepository;
         _basketRepository = basketRepository;
+        _sender = sender;
     }
 
     public async Task<Result> Handle(CompleteCashPaymentCommand request, CancellationToken cancellationToken)
@@ -68,6 +73,7 @@ public class CompleteCashPaymentCommandHandler : ICommandHandler<CompleteCashPay
             }
 
             basket.CompleteCheckout();
+            await SellItemsAsync(basket);
 
             await _paymentRepository.UnitOfWork.CommitTransactionAsync(transactionId, cancellationToken);
 
@@ -78,5 +84,16 @@ public class CompleteCashPaymentCommandHandler : ICommandHandler<CompleteCashPay
             await _paymentRepository.UnitOfWork.RollbackTransactionAsync(cancellationToken);
             return Result.Failure(Error.Dummy);
         }
+    }
+    
+    private async Task SellItemsAsync(Basket basket)
+    {
+        Dictionary<long, int> itemQuantities = new Dictionary<long, int>();
+        foreach (var item in basket.BasketItems)
+        {
+            itemQuantities[item.ItemId] = item.Quantity;
+        }
+        MarkItemsAsSoldCommand command = new MarkItemsAsSoldCommand(itemQuantities);
+        await this._sender.Send(command);
     }
 }

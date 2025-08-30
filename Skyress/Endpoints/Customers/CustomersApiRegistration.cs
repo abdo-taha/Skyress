@@ -20,7 +20,7 @@ public static class CustomersApiRegistration
         
         // Query endpoints
         api.MapGet("/", GetAllCustomersEndpoint.GetAllCustomersAsync);
-        api.MapGet("{id:long}", GetCustomerEndpoint.GetCustomerByIdAsync);
+        api.MapGet("{id:long}", GetCustomerEndpoint.GetCustomerByIdAsync).WithName(nameof(GetCustomerEndpoint));
         
         // Command endpoints
         api.MapPost("/", CreateCustomerEndpoint.CreateCustomerAsync);

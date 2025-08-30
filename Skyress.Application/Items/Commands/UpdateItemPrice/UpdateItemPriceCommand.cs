@@ -7,7 +7,8 @@ using Skyress.Domain.Common;
 
 public record UpdateItemPriceCommand(
     long Id,
-    decimal Price) : ICommand<Item>;
+    decimal? Price,
+    decimal? CostPrice) : ICommand<Item>;
 
 public class UpdateItemPriceCommandHandler : ICommandHandler<UpdateItemPriceCommand, Item>
 {
@@ -26,7 +27,7 @@ public class UpdateItemPriceCommandHandler : ICommandHandler<UpdateItemPriceComm
             return Result<Item>.Failure(new Error("UpdateItemPrice.NotFound", "Item not found"));
         }
 
-        existingItem.UpdatePrice(request.Price);
+        existingItem.UpdatePrice(request.Price, request.CostPrice);
         
         await _itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(existingItem);

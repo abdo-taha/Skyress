@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Basket;
@@ -13,9 +14,12 @@ public class BasketRepository
     {
     }
 
-    public async Task<IReadOnlyList<Basket>> GetByCustomerIdAsync(long customerId)
+    public async Task<IReadOnlyList<Basket>> GetByCustomerIdAsync(long? customerId)
     {
-        return await GetAsync(b => b.UserId == customerId).ToListAsync();
+        return await GetAsync(b => b.UserId == customerId, includes: new List<Expression<Func<Basket, object>>>()
+        {
+            basket => basket.BasketItems
+        }).ToListAsync();
     }
 
     public async Task<IReadOnlyList<Basket>> GetByStateAsync(BasketState state)
@@ -25,13 +29,17 @@ public class BasketRepository
 
     public async Task<Basket?> GetBasketWithItemsAsync(long basketId)
     {
-        return await SkyressDbContext.Baskets
-            .Include(b => b.BasketItems)
-            .FirstOrDefaultAsync(b => b.Id == basketId);
+        return await GetAsync(b => b.Id == basketId, includes: new List<Expression<Func<Basket, object>>>()
+        {
+            basket => basket.BasketItems
+        }).FirstOrDefaultAsync();
     }
 
     public async Task<Basket?> GetBasketByPaymentIdAsync(long paymentId)
     {
-        return await SkyressDbContext.Baskets.FirstOrDefaultAsync( b => b.PaymentId == paymentId);
+        return await GetAsync( b => b.PaymentId == paymentId, includes: new List<Expression<Func<Basket, object>>>()
+        {
+            basket => basket.BasketItems
+        }).FirstOrDefaultAsync();
     }
 }

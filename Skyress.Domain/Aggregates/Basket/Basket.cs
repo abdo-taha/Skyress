@@ -6,7 +6,7 @@ namespace Skyress.Domain.Aggregates.Basket;
 
 public class Basket : AggregateRoot
 {
-    public long UserId { get; set; }
+    public long? UserId { get; set; }
 
     public BasketState State { get; set; } = BasketState.Active;
     

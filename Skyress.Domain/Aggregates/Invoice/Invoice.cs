@@ -25,6 +25,7 @@ namespace Skyress.Domain.Aggregates.Invoice
         public void AddSoldItem(SoldItem soldItem)
         {
             _soldItems.Add(soldItem);
+            TotalAmount += soldItem.Price * soldItem.Quantity;
         }
 
         public void SoftDelete()

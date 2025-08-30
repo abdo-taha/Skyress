@@ -8,7 +8,7 @@ public class ClearBasketCommandHandler(IBasketRepository basketRepository) : ICo
 {
     public async Task<Result> Handle(ClearBasketCommand request, CancellationToken cancellationToken)
     {
-        var basket = await basketRepository.GetByIdAsync(request.BasketId);
+        var basket = await basketRepository.GetBasketWithItemsAsync(request.BasketId);
 
         if (basket is null)
         {

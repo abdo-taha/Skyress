@@ -11,9 +11,9 @@ public class PricingHistory : AggregateRoot, IAuditable
 
     public decimal NewPrice { get;  private set; }
 
-    public decimal OldCost { get;  private set; }
+    public decimal? OldCost { get;  private set; }
 
-    public decimal NewCost { get;  private set; }
+    public decimal? NewCost { get;  private set; }
 
     public PricingChangeType PricingChangeType { get;  private set; }
 
@@ -27,8 +27,8 @@ public class PricingHistory : AggregateRoot, IAuditable
         long itemId,
         decimal oldPrice,
         decimal newPrice,
-        decimal oldCost,
-        decimal newCost,
+        decimal? oldCost,
+        decimal? newCost,
         PricingChangeType pricingChangeType)
     {
         ItemId = itemId;

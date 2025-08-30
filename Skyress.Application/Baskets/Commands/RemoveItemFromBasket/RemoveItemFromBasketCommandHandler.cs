@@ -8,7 +8,7 @@ public class RemoveItemFromBasketCommandHandler(IBasketRepository basketReposito
 {
     public async Task<Result> Handle(RemoveItemFromBasketCommand request, CancellationToken cancellationToken)
     {
-        var basket = await basketRepository.GetByIdAsync(request.BasketId);
+        var basket = await basketRepository.GetBasketWithItemsAsync(request.BasketId);
 
         if (basket is null)
         {

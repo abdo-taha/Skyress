@@ -74,11 +74,13 @@ namespace Skyress.Domain.Aggregates.Item
             Description = description;
         }
 
-        public void UpdatePrice(decimal newPrice,PricingChangeType pricingChangeType = PricingChangeType.PriceChange)
+        public void UpdatePrice(decimal? newPrice, decimal? newCost, PricingChangeType pricingChangeType = PricingChangeType.PriceChange)
         {
             decimal oldPrice = Price;
-            Price = newPrice;
-            RaiseDomainEvent(new ItemPriceChangedDomainEvent(Guid.NewGuid(), Id, oldPrice, newPrice, CostPrice ?? 0M, CostPrice ?? 0M, pricingChangeType));
+            decimal? oldCostPrice = CostPrice;
+            Price = newPrice ?? oldPrice;
+            CostPrice = newCost ?? oldCostPrice;
+            RaiseDomainEvent(new ItemPriceChangedDomainEvent(Guid.NewGuid(), Id, oldPrice, Price, oldCostPrice, CostPrice, pricingChangeType));
         }
 
         public void AddPricingHistory(PricingHistory pricingHistory)

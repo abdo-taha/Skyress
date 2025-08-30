@@ -5,7 +5,7 @@ using Skyress.Domain.Common;
 
 namespace Skyress.Application.Baskets.Queries.GetBasketsByCustomer;
 
-public record GetBasketsByCustomerQuery(long CustomerId) : IQuery<IReadOnlyList<Basket>>;
+public record GetBasketsByCustomerQuery(long? CustomerId) : IQuery<IReadOnlyList<Basket>>;
 
 public class GetBasketsByCustomerQueryHandler(IBasketRepository basketRepository) : IQueryHandler<GetBasketsByCustomerQuery, IReadOnlyList<Basket>>
 {

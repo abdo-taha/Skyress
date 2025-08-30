@@ -31,7 +31,6 @@ namespace Skyress.Infrastructure.Persistence
             internal DbSet<Installment> Installments { get; set; }
     internal DbSet<OutboxMessage> OutboxMessages { get; set; }
     private IDbContextTransaction? _transaction;
-    private string? _transactionOwner;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,10 +51,6 @@ namespace Skyress.Infrastructure.Persistence
         {
             UpdateAudit(); 
             ConvertDomainEventsToOutboxMessage();
-            if (_transaction != null)
-            {
-                return 0;
-            }
 
             return await base.SaveChangesAsync(cancellationToken);
         }
@@ -68,7 +63,6 @@ namespace Skyress.Infrastructure.Persistence
             }
             
             _transaction = await base.Database.BeginTransactionAsync(cancellationToken);
-            _transactionOwner = id.ToString();
             return _transaction;
         }
 
@@ -76,7 +70,6 @@ namespace Skyress.Infrastructure.Persistence
         public async Task CommitTransactionAsync(Guid id, CancellationToken cancellationToken = default)
         {
             if (_transaction == null ) throw new Exception("No active transaction");
-            if (_transaction == null || _transactionOwner != id.ToString()) return;
             
             try
             {
@@ -96,7 +89,6 @@ namespace Skyress.Infrastructure.Persistence
                 {
                     await _transaction.DisposeAsync();
                     _transaction = null;
-                    _transactionOwner = null;
                 }
             }
         }
@@ -113,7 +105,6 @@ namespace Skyress.Infrastructure.Persistence
                 {
                     await _transaction.DisposeAsync();
                     _transaction = null;
-                    _transactionOwner = null;
                 }
             }
         }
