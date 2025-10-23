@@ -39,6 +39,6 @@ public static class BasketApiRegistration
 
         api.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync);
 
-        api.MapPatch("initiate-checkout", InitiateCheckoutBasketEndpoint.InitiateCheckoutBasketAsync);
+        api.MapPost("initiate-checkout", InitiateCheckoutBasketEndpoint.InitiateCheckoutBasketAsync);
     }
 }

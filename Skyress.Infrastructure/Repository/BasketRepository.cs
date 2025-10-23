@@ -34,12 +34,4 @@ public class BasketRepository
             basket => basket.BasketItems
         }).FirstOrDefaultAsync();
     }
-
-    public async Task<Basket?> GetBasketByPaymentIdAsync(long paymentId)
-    {
-        return await GetAsync( b => b.PaymentId == paymentId, includes: new List<Expression<Func<Basket, object>>>()
-        {
-            basket => basket.BasketItems
-        }).FirstOrDefaultAsync();
-    }
 }

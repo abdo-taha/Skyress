@@ -9,6 +9,8 @@ public class BasketDbConfiguration : IEntityTypeConfiguration<Basket>
     public void Configure(EntityTypeBuilder<Basket> builder)
     {
         builder.HasKey(b => b.Id);
+        
+        builder.Property(b => b.CheckoutId).HasMaxLength(50);
 
         builder.HasMany(b => b.BasketItems)
             .WithOne()

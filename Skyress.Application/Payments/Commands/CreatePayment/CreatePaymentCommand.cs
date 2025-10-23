@@ -25,6 +25,7 @@ public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand,
 
     public async Task<Result<Payment>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
+        // TODO : don't use invoice repo and send event to link
         var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId);
         if (invoice is null)
         {
@@ -43,6 +44,8 @@ public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand,
         var createdPayment = await _paymentRepository.CreateAsync(payment);
         await _paymentRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         
+        invoice.PaymentId = createdPayment.Id;
+        await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(createdPayment);
     }
 }

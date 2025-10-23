@@ -1,160 +1,50 @@
-using MediatR;
+using MassTransit;
 using Skyress.Application.Abstractions.Messaging;
+using Skyress.Application.Checkout.Events;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Application.Invoices.Commands.AddSoldItemToInvoice;
-using Skyress.Application.Invoices.Commands.CreateInvoice;
-using Skyress.Application.Payments.Commands.CreatePayment;
 using Skyress.Domain.Aggregates.Basket;
-using Skyress.Domain.Aggregates.Invoice;
-using Skyress.Domain.Aggregates.Payment;
 using Skyress.Domain.Common;
-using Skyress.Domain.Enums;
-
 namespace Skyress.Application.Baskets.Commands.InitiateCheckout;
 
-public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateCheckoutCommand, long>
+public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateCheckoutCommand>
 {
     private readonly IBasketRepository _basketRepository;
-    private readonly IItemRepository _itemRepository;
-    private readonly IMediator _mediator;
-
-    public InitiateCheckoutCommandHandler(IBasketRepository basketRepository, IItemRepository itemRepository, IMediator mediator)
+    private readonly IPublishEndpoint _publisher;
+    public InitiateCheckoutCommandHandler(IBasketRepository basketRepository, IPublishEndpoint publisher)
     {
         _basketRepository = basketRepository;
-        _itemRepository = itemRepository;
-        _mediator = mediator;
+        _publisher = publisher;
     }
 
-    public async Task<Result<long>> Handle(InitiateCheckoutCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(InitiateCheckoutCommand request, CancellationToken cancellationToken)
     {
-
-        Guid transactionId = Guid.NewGuid();
-        using var transaction = await _basketRepository.UnitOfWork.BeginTransactionAsync(transactionId, cancellationToken);
-        
-        try
-        {
-            var basket = await ValidateBasketAsync(request.BasketId);
-
-            await ReserveItemsAsync(basket);
-
-            var invoice = await CreateInvoiceAsync(basket, cancellationToken);
-
-            await AddSoldItemsToInvoiceAsync(basket, invoice, cancellationToken);
-
-            Payment payment = await CreatePaymentAsync(invoice, cancellationToken);
-            
-            basket.AddPaymentId(payment.Id);
-            
-            await _basketRepository.UnitOfWork.CommitTransactionAsync(transactionId, cancellationToken);
-
-            return Result.Success(payment.Id);
-        }
-        catch
-        {
-            await _basketRepository.UnitOfWork.RollbackTransactionAsync(cancellationToken);
-            return Result<long>.Failure(Error.Dummy);
-        }
-    }
-
-    private async Task<Basket> ValidateBasketAsync(long basketId)
-    {
-        var basket = await _basketRepository.GetBasketWithItemsAsync(basketId);
+        var basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
         if (basket is null)
         {
             throw new Exception();
         }
 
-        if (basket.State != BasketState.Active && basket.State != BasketState.Cancelled)
+        if (basket.InitiateCheckout().IsFailure)
         {
             throw new Exception();
         }
 
-        if (!basket.BasketItems.Any())
-        {
-            throw new Exception();
-        }
-
-        return basket;
-    }
-
-    private async Task ReserveItemsAsync(Basket basket)
-    {
-        var itemIds = basket.BasketItems.Select(bi => bi.ItemId).ToList();
-        var items = (await _itemRepository.GetByIdsAsync(itemIds)).ToDictionary(item => item.Id);
+        Guid correlationId = this.UpdateCheckoutId(basket);
         
-        foreach (var basketItem in basket.BasketItems)
-        {
-            if (!items.ContainsKey(basketItem.ItemId))
-            {
-                throw new Exception();
-            }
-
-            var item = items[basketItem.ItemId];
-            var availableQuantity = item.QuantityLeft - item.QuantityReserved;
-            
-            if (availableQuantity < basketItem.Quantity)
-            {
-                throw new Exception();
-            }
-        }
-
-        foreach (var basketItem in basket.BasketItems)
-        {
-            var item = items[basketItem.ItemId];
-            var reserveResult = item.ReserveQuantity(basketItem.Quantity);
-            if (reserveResult.IsFailure)
-            {
-                throw new InvalidOperationException(reserveResult.Error.Message);
-            }
-        }
-
-        var basketInitiateCheckoutResult = basket.InitiateCheckout();
-        if (basketInitiateCheckoutResult.IsFailure)
-        {
-            throw new InvalidOperationException(basketInitiateCheckoutResult.Error.Message);
-        }
+        await this._basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        
+        await this._publisher.Publish(new CheckoutInitiated(correlationId, request.BasketId));
+        
+        return Result.Success();
     }
 
-    private async Task<Invoice> CreateInvoiceAsync(Basket basket, CancellationToken cancellationToken)
+    private Guid UpdateCheckoutId(Basket basket)
     {
-        var createInvoiceCommand = new CreateInvoiceCommand(basket.UserId);
-        var invoiceResult = await _mediator.Send(createInvoiceCommand, cancellationToken);
-
-        if (invoiceResult.IsFailure)
+        if (!Guid.TryParse(basket.CheckoutId, out Guid checkoutId))
         {
-            throw new InvalidOperationException(invoiceResult.Error.Message);
+            Guid newCheckoutId = Guid.NewGuid();
+            basket.CheckoutId = newCheckoutId.ToString();
         }
-
-        return invoiceResult.Value;
-    }
-
-    private async Task AddSoldItemsToInvoiceAsync(Basket basket, Invoice invoice, CancellationToken cancellationToken)
-    {
-        foreach (var basketItem in basket.BasketItems)
-        {
-            var addSoldItemCommand = new AddSoldItemToInvoiceCommand(
-                invoice.Id,
-                basketItem.ItemId,
-                basketItem.Quantity
-            );
-
-            var soldItemResult = await _mediator.Send(addSoldItemCommand, cancellationToken);
-            if (soldItemResult.IsFailure)
-            {
-                throw new InvalidOperationException(soldItemResult.Error.Message);
-            }
-        }
-    }
-
-    private async Task<Payment> CreatePaymentAsync(Invoice invoice, CancellationToken cancellationToken)
-    {
-        var createPaymentCommand = new CreatePaymentCommand(invoice.Id, PaymentType.Cash);
-        var paymentResult = await _mediator.Send(createPaymentCommand, cancellationToken);
-
-        if (paymentResult.IsFailure)
-        {
-            throw new InvalidOperationException(paymentResult.Error.Message);
-        }
-        return paymentResult.Value;
+        return checkoutId;
     }
 }

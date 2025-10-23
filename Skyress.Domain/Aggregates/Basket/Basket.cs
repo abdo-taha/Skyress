@@ -10,9 +10,12 @@ public class Basket : AggregateRoot
 
     public BasketState State { get; set; } = BasketState.Active;
     
-    public long? PaymentId { get; set; }
+    public long? InvoiceId { get; set; }
+    
+    public string? CheckoutId { get; set; }
     
     private readonly List<BasketItem> _basketItems = new();
+    
     public IReadOnlyCollection<BasketItem> BasketItems => _basketItems.AsReadOnly();
 
     public Result AddItem(long itemId, int quantity)
@@ -92,20 +95,7 @@ public class Basket : AggregateRoot
         State = BasketState.Reserved;
         return Result.Success();
     }
-
-    public Result AddPaymentId(long paymentId)
-    {
-        if (State != BasketState.Reserved)
-        {
-            return Result.Failure(Error.Dummy);
-        }
-        if (this.PaymentId != null)
-        {
-            return Result.Failure(Error.Dummy);
-        }
-        this.PaymentId = paymentId;
-        return Result.Success();
-    }
+    
     public Result CompleteCheckout()
     {
         if (State != BasketState.Reserved)
@@ -125,7 +115,6 @@ public class Basket : AggregateRoot
         }
 
         State = BasketState.Cancelled;
-        this.PaymentId = null;
         return Result.Success();
     }
 }

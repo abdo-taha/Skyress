@@ -35,6 +35,10 @@ namespace Skyress.Infrastructure.Configurations
                 .WithOne()
                 .HasForeignKey(si => si.InvoiceId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.HasIndex(b => b.PaymentId)
+                .IsUnique()
+                .HasDatabaseName("IX_Invoice_PaymentId");
         }
     }
 }

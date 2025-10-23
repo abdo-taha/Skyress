@@ -4,5 +4,6 @@ namespace Skyress.Application.Contracts.Persistence
 {
     public interface IInvoiceRepository : IGenericRepository<Invoice>
     {
+        Task<Invoice?> GetByPaymentId(long paymentId);
     }
 }

@@ -6,12 +6,12 @@ namespace Skyress.API.Endpoints.Baskets;
 
 public static class InitiateCheckoutBasketEndpoint
 {
-    public static async Task<Ok<long>> InitiateCheckoutBasketAsync(
+    public static async Task<Ok> InitiateCheckoutBasketAsync(
         long basketId,
         ISender sender,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new InitiateCheckoutCommand(basketId), cancellationToken);
-        return TypedResults.Ok(result.Value);
+        return TypedResults.Ok();
     }
 }

@@ -133,11 +133,16 @@ namespace Skyress.Domain.Aggregates.Item
             return Result.Success();
         }
 
-        public void MarkAsSold(int quantity)
+        public Result MarkAsSold(int quantity)
         {
+            if (quantity > QuantityLeft || quantity > QuantityReserved)
+            {
+                return Result.Failure(Error.Dummy);
+            }
             QuantityReserved -= quantity;
             QuantityLeft -= quantity;
             QuantitySold += quantity;
+            return Result.Success();
         }
     }
 }

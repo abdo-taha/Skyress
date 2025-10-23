@@ -5,36 +5,43 @@ using Skyress.Domain.Common;
 
 namespace Skyress.Application.Items.Commands.MarkItemsAsSold;
 
-public record MarkItemsAsSoldCommand(Dictionary<long, int> ItemQuantities) : ICommand;
+public record MarkItemsAsSoldCommand(long BasketId) : ICommand;
 
 public class MarkItemsAsSoldCommandHandler : ICommandHandler<MarkItemsAsSoldCommand>
 {
     private readonly IItemRepository _itemRepository;
+    private readonly IBasketRepository _basketRepository;
 
-    public MarkItemsAsSoldCommandHandler(IItemRepository itemRepository)
+    public MarkItemsAsSoldCommandHandler(IItemRepository itemRepository, IBasketRepository basketRepository)
     {
         _itemRepository = itemRepository;
+        _basketRepository = basketRepository;
     }
 
     public async Task<Result> Handle(MarkItemsAsSoldCommand request, CancellationToken cancellationToken)
     {
-        var itemIds = request.ItemQuantities.Keys.ToList();
+        var basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
+        if (basket == null)
+        {
+            return Result.Failure(Error.Dummy);
+        }
+        
+        var itemIds = basket.BasketItems.Select(i => i.ItemId).ToList();
         var items = (await _itemRepository.GetByIdsAsync(itemIds)).ToDictionary(item => item.Id);
 
-        foreach (var kvp in request.ItemQuantities)
+        foreach (var soldItem in basket.BasketItems)
         {
-            if (!items.TryGetValue(kvp.Key, out var item))
+            if (!items.TryGetValue(soldItem.ItemId, out var item))
             {
-                return Result.Failure(new Error("Item.NotFound", $"Item with ID {kvp.Key} not found"));
+                return Result.Failure(new Error("Item.NotFound", $"Item with ID {soldItem.ItemId} not found"));
             }
 
-            if (item.QuantityLeft < kvp.Value)
-            {
-                return Result.Failure(new Error("Item.InsufficientStock", 
-                    $"Insufficient stock for item {item.Name}. Available: {item.QuantityLeft}, Requested: {kvp.Value}"));
-            }
 
-            item.MarkAsSold(kvp.Value);
+            Result result = item.MarkAsSold(soldItem.Quantity);
+            if (result.IsFailure)
+            {
+                return Result.Failure(result.Error);
+            }
         }
 
         await _itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

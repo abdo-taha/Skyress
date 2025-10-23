@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Skyress.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Skyress.Infrastructure.Persistence;
 namespace Skyress.Infrastructure.Migrations
 {
     [DbContext(typeof(SkyressDbContext))]
-    partial class SkyressDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251020183203_AddCheckoutSaga")]
+    partial class AddCheckoutSaga
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,11 +61,7 @@ namespace Skyress.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
                     NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<long>("Id"), 100000L, null, null, null, null, null);
 
-                    b.Property<string>("CheckoutId")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<long?>("InvoiceId")
+                    b.Property<long?>("PaymentId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("State")
@@ -173,9 +172,6 @@ namespace Skyress.Infrastructure.Migrations
                     b.Property<DateTime>("LastEditDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long?>("PaymentId")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("State")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -185,10 +181,6 @@ namespace Skyress.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PaymentId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Invoice_PaymentId");
 
                     b.ToTable("Invoices");
                 });

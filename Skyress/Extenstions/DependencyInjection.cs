@@ -1,4 +1,6 @@
-﻿namespace Skyress.API.Extenstions;
+﻿using Skyress.Infrastructure.Saga;
+
+namespace Skyress.API.Extenstions;
 
 using Asp.Versioning;
 using Skyress.Infrastructure.Extensions;
@@ -41,7 +43,8 @@ public static class DependencyInjection
         })
         .AddQuartzHostedService();
         
-
+        services.AddSagas(configuration);
+        
         return services;
     }
 
