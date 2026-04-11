@@ -1,11 +1,12 @@
 using MassTransit;
 using Skyress.Application.Checkout.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Skyress.Application.Checkout.Sagas;
 
 public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
 {
-    public State ResrvingItems { get;  set; } = null!;
+    public State ReservingItems { get;  set; } = null!;
     
     public State InitiatingInvoice { get;  set; } = null!;
     
@@ -34,8 +35,11 @@ public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
     public Event<FinalizedCheckout> FinalizedCheckoutEvent { get;  set; } = null!;
     
 
-    public CheckoutStateMachine()
+    private readonly ILogger<CheckoutStateMachine> _logger;
+
+    public CheckoutStateMachine(ILogger<CheckoutStateMachine> logger)
     {
+        _logger = logger;
         InstanceState(x => x.CurrentState);
         Event(() => CheckoutInitiated, e => e.CorrelateById(m => m.Message.CorrelationId));
         Event(() => ItemsReservedEvent, e => e.CorrelateById(m => m.Message.CorrelationId));
@@ -49,14 +53,18 @@ public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
 
         Initially(
             When(CheckoutInitiated)
-                .Then(ctx => ctx.Saga.BasketId = ctx.Message.BasketId)
+                .Then(ctx =>
+                {
+                    _logger.LogInformation("Checkout Saga Started: {CorrelationId}, for Basket: {BasketId}", ctx.Saga.CorrelationId, ctx.Message.BasketId);
+                    ctx.Saga.BasketId = ctx.Message.BasketId;
+                })
                 .Publish(ctx => new ReserveItemsRequested(ctx.Saga.CorrelationId, ctx.Saga.BasketId))
-                .TransitionTo(ResrvingItems)
+                .TransitionTo(ReservingItems)
         );
 
-        During(ResrvingItems,
+        During(ReservingItems,
             When(ItemsReservedEvent)
-
+                .Then(ctx => _logger.LogInformation("Items Reserved for Saga: {CorrelationId}", ctx.Saga.CorrelationId))
                 .Publish(ctx => new InitiateInvoiceRequested(ctx.Saga.CorrelationId, ctx.Saga.BasketId))
                 .TransitionTo(InitiatingInvoice)
         );
@@ -65,6 +73,7 @@ public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
             When(InvoiceInitiatedEvent)
                 .Then(ctx =>
                 {
+                    _logger.LogInformation("Invoice Initiated for Saga: {CorrelationId}, InvoiceId: {InvoiceId}", ctx.Saga.CorrelationId, ctx.Message.InvoiceId);
                     ctx.Saga.InvoiceId = ctx.Message.InvoiceId;
                 })
                 .Publish(ctx => new BuildInvoiceRequested(ctx.Saga.CorrelationId, ctx.Saga.InvoiceId!.Value, ctx.Saga.BasketId))
@@ -73,23 +82,30 @@ public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
 
         During(BuildingInvoice,
             When(InvoiceCreatedEvent)
+                .Then(ctx => _logger.LogInformation("Invoice Created/Built for Saga: {CorrelationId}", ctx.Saga.CorrelationId))
                 .Publish(ctx => new CreatePaymentRequested(ctx.Saga.CorrelationId, ctx.Saga.InvoiceId!.Value))
                 .TransitionTo(InitiatingPayment)
         );
 
         During(InitiatingPayment,
             When(PaymentInitiatedEvent)
-                .Then(ctx => ctx.Saga.PaymentId = ctx.Message.PaymentId)
+                .Then(ctx =>
+                {
+                    _logger.LogInformation("Payment Initiated for Saga: {CorrelationId}, PaymentId: {PaymentId}", ctx.Saga.CorrelationId, ctx.Message.PaymentId);
+                    ctx.Saga.PaymentId = ctx.Message.PaymentId;
+                })
                 .TransitionTo(PaymentPending));
         
         During(PaymentPending,
             When(PaymentCompletedEvent)
+                .Then(ctx => _logger.LogInformation("Payment Completed for Saga: {CorrelationId}", ctx.Saga.CorrelationId))
                 .Publish(ctx => new FinalizeCheckoutRequested(ctx.Saga.CorrelationId, ctx.Saga.InvoiceId!.Value, ctx.Saga.BasketId))
                 .TransitionTo(Finalizing)
         );
         
         During(Finalizing,
             When(FinalizedCheckoutEvent)
+                .Then(ctx => _logger.LogInformation("Checkout Finalized and Saga Completed: {CorrelationId}", ctx.Saga.CorrelationId))
                 .TransitionTo(Completed)
                 .Finalize());
 

@@ -40,11 +40,13 @@ public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateChe
 
     private Guid UpdateCheckoutId(Basket basket)
     {
-        if (!Guid.TryParse(basket.CheckoutId, out Guid checkoutId))
+        if (Guid.TryParse(basket.CheckoutId, out Guid checkoutId) && checkoutId != Guid.Empty)
         {
-            Guid newCheckoutId = Guid.NewGuid();
-            basket.CheckoutId = newCheckoutId.ToString();
+            return checkoutId;
         }
-        return checkoutId;
+
+        Guid newCheckoutId = Guid.NewGuid();
+        basket.CheckoutId = newCheckoutId.ToString();
+        return newCheckoutId;
     }
 }
