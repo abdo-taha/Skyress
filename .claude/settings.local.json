@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Get-ChildItem -Path \"Skyress\\\\*\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(.\\\\.specify\\\\scripts\\\\powershell\\\\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(dotnet build *)"
+    ]
+  }
+}

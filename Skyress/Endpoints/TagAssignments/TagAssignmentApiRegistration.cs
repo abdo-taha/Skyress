@@ -22,7 +22,8 @@ public static class TagAssignmentApiRegistration
         api.MapGet("/tag/{tagId:long}", GetTagAssignmentsByTagEndpoint.GetTagAssignmentsByTagAsync);
         
 
-        api.MapPost("/", CreateTagAssignmentEndpoint.CreateTagAssignmentAsync);
-        api.MapDelete("{id:long}", DeleteTagAssignmentEndpoint.DeleteTagAssignmentAsync);
+        // Write operations — Admin only
+        api.MapPost("/", CreateTagAssignmentEndpoint.CreateTagAssignmentAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapDelete("{id:long}", DeleteTagAssignmentEndpoint.DeleteTagAssignmentAsync).RequireAuthorization(p => p.RequireRole("Admin"));
     }
 }

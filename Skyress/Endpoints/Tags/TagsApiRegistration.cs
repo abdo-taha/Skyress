@@ -21,10 +21,11 @@ public static class TagsApiRegistration
         api.MapGet("{id:long}", GetTagEndpoint.GetTagByIdAsync);
         api.MapGet("/type/{type:int}", GetTagsByTypeEndpoint.GetTagsByTypeAsync);
         
-        api.MapPost("/", CreateTagEndpoint.CreateTagAsync);
-        api.MapDelete("{id:long}", DeleteTagEndpoint.DeleteTagAsync);
-        
-        api.MapPatch("{id:long}/name", UpdateTagEndpoints.UpdateTagNameAsync);
-        api.MapPatch("{id:long}/type", UpdateTagEndpoints.UpdateTagTypeAsync);
+        // Write operations — Admin only
+        api.MapPost("/", CreateTagEndpoint.CreateTagAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapDelete("{id:long}", DeleteTagEndpoint.DeleteTagAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+
+        api.MapPatch("{id:long}/name", UpdateTagEndpoints.UpdateTagNameAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/type", UpdateTagEndpoints.UpdateTagTypeAsync).RequireAuthorization(p => p.RequireRole("Admin"));
     }
 }

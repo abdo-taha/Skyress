@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Newtonsoft.Json;
 using Skyress.Application.Contracts.Persistence;
+using Skyress.Domain.Aggregates.Auth;
 using Skyress.Domain.Aggregates.Customer;
 using Skyress.Domain.Aggregates.Invoice;
 using Skyress.Domain.Aggregates.Item;
@@ -27,9 +28,13 @@ namespace Skyress.Infrastructure.Persistence
         internal DbSet<Basket> Baskets { get; set; }
         internal DbSet<BasketItem> BasketItems { get; set; }
         internal DbSet<SoldItem> SoldItems { get; set; }
-        internal DbSet<PricingHistory> PricingHistories { get; set; } 
+        internal DbSet<PricingHistory> PricingHistories { get; set; }
         internal DbSet<Installment> Installments { get; set; }
         internal DbSet<OutboxMessage> OutboxMessages { get; set; }
+        internal DbSet<User> Users { get; set; }
+        internal DbSet<Role> Roles { get; set; }
+        internal DbSet<UserRole> UserRoles { get; set; }
+        internal DbSet<RefreshToken> RefreshTokens { get; set; }
         private IDbContextTransaction? _transaction;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

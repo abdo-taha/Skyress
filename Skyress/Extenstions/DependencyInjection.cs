@@ -3,11 +3,14 @@
 namespace Skyress.API.Extenstions;
 
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Skyress.Infrastructure.Extensions;
 using Skyress.Application.Extensions;
 using Quartz;
 using Skyress.API.OpenApi;
 using Skyress.Infrastructure.BackGroundJobs;
+using System.Text;
 
 public static class DependencyInjection
 {
@@ -31,6 +34,32 @@ public static class DependencyInjection
             options.SubstituteApiVersionInUrl = true;
         });
         services.AddEndpointsApiExplorer();
+
+        var secretKey = configuration["Jwt:SecretKey"] ?? "default-jwt-secret-key-change-in-production";
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
+                    ValidateIssuer = true,
+                    ValidIssuer = configuration["Jwt:Issuer"] ?? "Skyress",
+                    ValidateAudience = true,
+                    ValidAudience = configuration["Jwt:Audience"] ?? "SkyressAPI",
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+        services.AddAuthorization(options =>
+        {
+            options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+        });
+
+        services.AddHttpContextAccessor();
 
         services.AddQuartz(configure =>
         {

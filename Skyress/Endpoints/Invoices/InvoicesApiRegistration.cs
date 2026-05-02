@@ -17,18 +17,18 @@ public static class InvoicesApiRegistration
             .Build();
         var api = app.MapGroup("api/invoices").WithApiVersionSet(versionSet).WithTags("Invoices");
         
-        // Query endpoints
-        api.MapGet("/", GetAllInvoicesEndpoint.GetAllInvoicesAsync);
-        api.MapGet("{id:long}", GetInvoiceEndpoint.GetInvoiceByIdAsync);
-        api.MapGet("/customer/{customerId:long}", GetInvoicesByCustomerEndpoint.GetInvoicesByCustomerAsync);
-        api.MapGet("/state/{state}", GetInvoicesByStateEndpoint.GetInvoicesByStateAsync);
-        api.MapGet("{id:long}/withPayments", GetInvoiceWithPaymentsEndpoint.GetInvoiceWithPaymentsAsync);
-        
-        // Command endpoints
-        api.MapDelete("{id:long}", DeleteInvoiceEndpoint.DeleteInvoiceAsync);
+        // Query endpoints — Admin only
+        api.MapGet("/", GetAllInvoicesEndpoint.GetAllInvoicesAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapGet("{id:long}", GetInvoiceEndpoint.GetInvoiceByIdAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapGet("/customer/{customerId:long}", GetInvoicesByCustomerEndpoint.GetInvoicesByCustomerAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapGet("/state/{state}", GetInvoicesByStateEndpoint.GetInvoicesByStateAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapGet("{id:long}/withPayments", GetInvoiceWithPaymentsEndpoint.GetInvoiceWithPaymentsAsync).RequireAuthorization(p => p.RequireRole("Admin"));
 
-        // Update endpoints
-        api.MapPatch("{id:long}/customerId", UpdateInvoiceEndpoints.UpdateInvoiceCustomerIdAsync);
-        api.MapPatch("{id:long}/state", UpdateInvoiceEndpoints.UpdateInvoiceStateAsync);
+        // Command endpoints — Admin only
+        api.MapDelete("{id:long}", DeleteInvoiceEndpoint.DeleteInvoiceAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+
+        // Update endpoints — Admin only
+        api.MapPatch("{id:long}/customerId", UpdateInvoiceEndpoints.UpdateInvoiceCustomerIdAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/state", UpdateInvoiceEndpoints.UpdateInvoiceStateAsync).RequireAuthorization(p => p.RequireRole("Admin"));
     }
 }

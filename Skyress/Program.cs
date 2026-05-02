@@ -8,6 +8,7 @@ using Skyress.API.Endpoints.Tags;
 using Skyress.API.Endpoints.Todos;
 using Skyress.API.Endpoints.TagAssignments;
 using Skyress.API.Endpoints.Baskets;
+using Skyress.Endpoints.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -21,6 +22,10 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapAuthApi();
 app.MapItemsApi();
 app.MapCustomersApi();
 app.MapInvoicesApi();

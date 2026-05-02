@@ -17,10 +17,11 @@ public static class PaymentsApiRegistration
             .Build();
         var api = app.MapGroup("api/payments").WithApiVersionSet(versionSet).WithTags("Payments");
         
-        api.MapGet("/", GetAllPaymentsEndpoint.GetAllPaymentsAsync);
-        api.MapGet("{id:long}", GetPaymentEndpoint.GetPaymentByIdAsync);
-        api.MapGet("/invoice/{invoiceId:long}", GetPaymentsByInvoiceEndpoint.GetPaymentsByInvoiceAsync);
-        
-        api.MapPost("{id:long}/Pay", CompleteCashPaymentEndpoint.CompleteCashPaymentAsync);
+        // All payment endpoints — Admin only
+        api.MapGet("/", GetAllPaymentsEndpoint.GetAllPaymentsAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapGet("{id:long}", GetPaymentEndpoint.GetPaymentByIdAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapGet("/invoice/{invoiceId:long}", GetPaymentsByInvoiceEndpoint.GetPaymentsByInvoiceAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+
+        api.MapPost("{id:long}/Pay", CompleteCashPaymentEndpoint.CompleteCashPaymentAsync).RequireAuthorization(p => p.RequireRole("Admin"));
     }
 }

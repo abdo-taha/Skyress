@@ -24,17 +24,17 @@ public static class ItemsApiRegistration
         api.MapGet("{id:long}", GetItemByIdEndpoint.GetItemByIdAsync);
         api.MapGet("/pricingHistory{id:long}", GetItemPricingHistoryEndpoint.GetItemPricingHistoryAsync);
         
-        // Command endpoints
-        api.MapPost("/", CreateItemEndpoint.CreateItemAsync);
-        api.MapDelete("{id:long}", DeleteItemEndpoint.DeleteItemAsync);
+        // Command endpoints — Admin only
+        api.MapPost("/", CreateItemEndpoint.CreateItemAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapDelete("{id:long}", DeleteItemEndpoint.DeleteItemAsync).RequireAuthorization(p => p.RequireRole("Admin"));
 
-        // Update endpoints
-        api.MapPatch("{id:long}/name", UpdateItemEndpoints.UpdateItemNameAsync);
-        api.MapPatch("{id:long}/description", UpdateItemEndpoints.UpdateItemDescriptionAsync);
-        api.MapPatch("{id:long}/price", UpdateItemEndpoints.UpdateItemPriceAsync);
-        api.MapPatch("{id:long}/quantityLeft", UpdateItemEndpoints.UpdateItemQuantityLeftAsync);
-        api.MapPatch("{id:long}/qrcode", UpdateItemEndpoints.UpdateItemQrCodeAsync);
-        api.MapPatch("{id:long}/unit", UpdateItemEndpoints.UpdateItemUnitAsync);
+        // Update endpoints — Admin only
+        api.MapPatch("{id:long}/name", UpdateItemEndpoints.UpdateItemNameAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/description", UpdateItemEndpoints.UpdateItemDescriptionAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/price", UpdateItemEndpoints.UpdateItemPriceAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/quantityLeft", UpdateItemEndpoints.UpdateItemQuantityLeftAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/qrcode", UpdateItemEndpoints.UpdateItemQrCodeAsync).RequireAuthorization(p => p.RequireRole("Admin"));
+        api.MapPatch("{id:long}/unit", UpdateItemEndpoints.UpdateItemUnitAsync).RequireAuthorization(p => p.RequireRole("Admin"));
     }
     
     private static RouteGroupBuilder MapItemsApiV2(this IEndpointRouteBuilder app)
