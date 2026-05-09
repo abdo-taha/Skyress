@@ -1,12 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Skyress.Application.TagAssignments.Commands.DeleteTagAssignment;
 
 namespace Skyress.API.Endpoints.TagAssignments;
 
 public static class DeleteTagAssignmentEndpoint
 {
-    public static async Task<Results<Ok, NotFound, BadRequest<string>>> DeleteTagAssignmentAsync(
+    public static async Task<Results<Ok, NotFound, UnprocessableEntity<ProblemDetails>>> DeleteTagAssignmentAsync(
         long id,
         ISender sender,
         CancellationToken cancellationToken)
@@ -14,7 +15,12 @@ public static class DeleteTagAssignmentEndpoint
         var result = await sender.Send(new DeleteTagAssignmentCommand(id), cancellationToken);
         if (result.IsFailure)
         {
-            return TypedResults.BadRequest(result.Error.Message);
+            return TypedResults.UnprocessableEntity(new ProblemDetails
+            {
+                Title = "Validation Error",
+                Detail = result.Error.Message,
+                Status = StatusCodes.Status422UnprocessableEntity
+            });
         }
         return TypedResults.Ok();
     }

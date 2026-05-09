@@ -1,13 +1,18 @@
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Common;
 
 namespace Skyress.Application.Baskets.Commands.RemoveItemFromBasket;
 
-public class RemoveItemFromBasketCommandHandler(IBasketRepository basketRepository) : ICommandHandler<RemoveItemFromBasketCommand>
+public class RemoveItemFromBasketCommandHandler(IBasketRepository basketRepository, ILogger<RemoveItemFromBasketCommandHandler> logger) : ICommandHandler<RemoveItemFromBasketCommand>
 {
+    private readonly ILogger<RemoveItemFromBasketCommandHandler> _logger = logger;
+
     public async Task<Result> Handle(RemoveItemFromBasketCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Handling {Command}", nameof(RemoveItemFromBasketCommand));
+
         var basket = await basketRepository.GetBasketWithItemsAsync(request.BasketId);
 
         if (basket is null)
@@ -23,7 +28,7 @@ public class RemoveItemFromBasketCommandHandler(IBasketRepository basketReposito
         }
 
         await basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-
+        _logger.LogInformation("{Command} completed", nameof(RemoveItemFromBasketCommand));
         return Result.Success();
     }
 }

@@ -1,6 +1,6 @@
-﻿using Skyress.Domain.primitives;
+﻿using Skyress.Domain.Primitives;
 
-namespace Skyress.Domain.Aggregates.TagAssignmnet;
+namespace Skyress.Domain.Aggregates.TagAssignment;
 
 public class TagAssignment : AggregateRoot
 {

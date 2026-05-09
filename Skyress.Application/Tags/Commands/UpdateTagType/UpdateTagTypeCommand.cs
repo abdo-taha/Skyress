@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Common;
@@ -10,15 +11,19 @@ public record UpdateTagTypeCommand(long Id, TagType Type) : ICommand;
 public class UpdateTagTypeCommandHandler : ICommandHandler<UpdateTagTypeCommand>
 {
     private readonly ITagRepository _tagRepository;
+    private readonly ILogger<UpdateTagTypeCommandHandler> _logger;
 
-    public UpdateTagTypeCommandHandler(ITagRepository tagRepository)
+    public UpdateTagTypeCommandHandler(ITagRepository tagRepository, ILogger<UpdateTagTypeCommandHandler> logger)
     {
         _tagRepository = tagRepository;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(UpdateTagTypeCommand request, CancellationToken cancellationToken)
     {
-        var tag = await _tagRepository.GetByIdAsync(request.Id);
+        _logger.LogInformation("Handling {Command}", nameof(UpdateTagTypeCommand));
+
+        var tag = await _tagRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (tag is null)
         {
@@ -27,7 +32,7 @@ public class UpdateTagTypeCommandHandler : ICommandHandler<UpdateTagTypeCommand>
 
         tag.Type = request.Type;
         await _tagRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-
+        _logger.LogInformation("{Command} completed", nameof(UpdateTagTypeCommand));
         return Result.Success();
     }
 }

@@ -1,18 +1,18 @@
 ﻿using System.Linq.Expressions;
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 
 namespace Skyress.Application.Contracts.Persistence
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {
         public IUnitOfWork UnitOfWork { get; }
-        public Task<IReadOnlyList<T>> GetAllAsync();
+        public Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default);
 
-        public Task<T?> GetByIdAsync(long id);
+        public Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
 
-        public Task<T> CreateAsync(T entity);
+        public Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default);
 
-        public Task DeleteByIdAsync(long id);
+        public Task DeleteByIdAsync(long id, CancellationToken cancellationToken = default);
 
         public IQueryable<T> GetAsync(
             Expression<Func<T, bool>>? predicate = null,

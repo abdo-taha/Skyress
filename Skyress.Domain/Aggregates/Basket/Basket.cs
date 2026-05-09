@@ -1,4 +1,4 @@
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
 

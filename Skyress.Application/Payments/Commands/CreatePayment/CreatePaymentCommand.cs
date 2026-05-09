@@ -1,35 +1,41 @@
 namespace Skyress.Application.Payments.Commands.CreatePayment;
 
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
+using Skyress.Application.Payments.Responses;
 using Skyress.Domain.Aggregates.Payment;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
 
 public record CreatePaymentCommand(
     long InvoiceId,
-    PaymentType PaymentType) : ICommand<Payment>;
+    PaymentType PaymentType) : ICommand<PaymentResponse>;
 
-public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand, Payment>
+public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand, PaymentResponse>
 {
     private readonly IPaymentRepository _paymentRepository;
     private readonly IInvoiceRepository _invoiceRepository;
+    private readonly ILogger<CreatePaymentCommandHandler> _logger;
 
     public CreatePaymentCommandHandler(
         IPaymentRepository paymentRepository,
-        IInvoiceRepository invoiceRepository)
+        IInvoiceRepository invoiceRepository,
+        ILogger<CreatePaymentCommandHandler> logger)
     {
         _paymentRepository = paymentRepository;
         _invoiceRepository = invoiceRepository;
+        _logger = logger;
     }
 
-    public async Task<Result<Payment>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PaymentResponse>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
-        // TODO : don't use invoice repo and send event to link
-        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId);
+        _logger.LogInformation("Handling {Command}", nameof(CreatePaymentCommand));
+
+        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId, cancellationToken);
         if (invoice is null)
         {
-            return Result<Payment>.Failure(new Error("CreatePayment.InvoiceNotFound", "Invoice not found"));
+            return Result<PaymentResponse>.Failure(new Error("CreatePayment.InvoiceNotFound", "Invoice not found"));
         }
 
         var payment = new Payment
@@ -41,11 +47,12 @@ public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand,
             PaymentState = PaymentState.Initiated
         };
 
-        var createdPayment = await _paymentRepository.CreateAsync(payment);
+        var createdPayment = await _paymentRepository.CreateAsync(payment, cancellationToken);
         await _paymentRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        
+
         invoice.PaymentId = createdPayment.Id;
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(createdPayment);
+        _logger.LogInformation("{Command} completed. Id: {Id}", nameof(CreatePaymentCommand), createdPayment.Id);
+        return Result.Success(PaymentResponse.FromDomain(createdPayment));
     }
 }

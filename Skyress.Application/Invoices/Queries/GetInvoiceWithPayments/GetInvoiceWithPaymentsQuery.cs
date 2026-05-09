@@ -3,6 +3,7 @@ using Skyress.Domain.Enums;
 namespace Skyress.Application.Invoices.Queries.GetInvoiceWithPayments;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Payment;
@@ -14,18 +15,23 @@ public class GetInvoiceWithPaymentsQueryHandler : IQueryHandler<GetInvoiceWithPa
 {
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IPaymentRepository _paymentRepository;
+    private readonly ILogger<GetInvoiceWithPaymentsQueryHandler> _logger;
 
     public GetInvoiceWithPaymentsQueryHandler(
         IInvoiceRepository invoiceRepository,
-        IPaymentRepository paymentRepository)
+        IPaymentRepository paymentRepository,
+        ILogger<GetInvoiceWithPaymentsQueryHandler> logger)
     {
         _invoiceRepository = invoiceRepository;
         _paymentRepository = paymentRepository;
+        _logger = logger;
     }
 
     public async Task<Result<InvoiceWithPaymentsDto>> Handle(GetInvoiceWithPaymentsQuery request, CancellationToken cancellationToken)
     {
-        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId);
+        _logger.LogInformation("Handling {Command}", nameof(GetInvoiceWithPaymentsQuery));
+
+        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId, cancellationToken);
         if (invoice is null)
         {
             return Result<InvoiceWithPaymentsDto>.Failure(new Error("GetInvoiceWithPayments.NotFound", "Invoice not found"));
@@ -48,9 +54,10 @@ public class GetInvoiceWithPaymentsQueryHandler : IQueryHandler<GetInvoiceWithPa
             Payments = paymentsList.Select(Convert).ToList()
         };
 
+        _logger.LogInformation("{Command} completed. Id: {Id}", nameof(GetInvoiceWithPaymentsQuery), invoice.Id);
         return Result.Success(invoiceWithPayments);
     }
-    
+
     private PaymentDto Convert(Payment payment)
     {
         return new PaymentDto()
@@ -79,7 +86,7 @@ public class InvoiceWithPaymentsDto
 public class PaymentDto
 {
     public long Id { get; set; }
-    
+
     public PaymentType PaymentType { get; set; }
 
     public PaymentState PaymentState { get; set; }

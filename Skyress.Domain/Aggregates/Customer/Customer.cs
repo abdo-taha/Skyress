@@ -1,7 +1,7 @@
 ﻿namespace Skyress.Domain.Aggregates.Customer;
 
 using Skyress.Domain.Enums;
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 
 public sealed class Customer : AggregateRoot, IAuditable, ISoftDeletable
 {
@@ -17,6 +17,17 @@ public sealed class Customer : AggregateRoot, IAuditable, ISoftDeletable
 
     public DateTime CreatedAt { get; set; }
     public bool IsDeleted { get; private set; }
+
+    public static Customer Create(string name, string notes, CustomerState state)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return new Customer
+        {
+            Name = name,
+            Notes = notes,
+            State = state
+        };
+    }
 
     public void SoftDelete()
     {

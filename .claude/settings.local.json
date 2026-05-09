@@ -5,7 +5,9 @@
       "Bash(Get-ChildItem -Path \"Skyress\\\\*\" -Directory)",
       "Bash(Select-Object Name)",
       "Bash(.\\\\.specify\\\\scripts\\\\powershell\\\\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
-      "Bash(dotnet build *)"
+      "Bash(dotnet build *)",
+      "Bash(powershell -Command \"\\(Get-Content 'specs/002-constitution-refactor/tasks.md'\\) -replace '- \\\\[ \\\\]', '- [X]' | Set-Content 'specs/002-constitution-refactor/tasks.md'\")",
+      "Bash(echo \"exit:$?\")"
     ]
   }
 }

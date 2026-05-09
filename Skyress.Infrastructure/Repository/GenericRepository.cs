@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 using Skyress.Infrastructure.Persistence;
 using System.Linq.Expressions;
 
@@ -49,15 +49,15 @@ namespace Skyress.Infrastructure.Repository
             return query;
         }
 
-        public async Task<T> CreateAsync(T entity)
+        public async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default)
         {
-            var savedEntity = await this.DbSet.AddAsync(entity);
+            var savedEntity = await this.DbSet.AddAsync(entity, cancellationToken);
             return savedEntity.Entity;
         }
 
-        public async Task DeleteByIdAsync(long id)
+        public async Task DeleteByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            var entity = await this.GetByIdAsync(id);
+            var entity = await this.GetByIdAsync(id, cancellationToken);
             if (entity == null)
             {
                 return;
@@ -72,14 +72,14 @@ namespace Skyress.Infrastructure.Repository
 
         public IUnitOfWork UnitOfWork => this.SkyressDbContext;
 
-        public async Task<IReadOnlyList<T>> GetAllAsync()
+        public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await GetAsync().ToListAsync();
+            return await GetAsync().ToListAsync(cancellationToken);
         }
 
-        public async Task<T?> GetByIdAsync(long id)
+        public async Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            return await GetAsync(predicate: t => t.Id == id).FirstOrDefaultAsync();
+            return await GetAsync(predicate: t => t.Id == id).FirstOrDefaultAsync(cancellationToken);
         }
 
         private void HardDeleteAsync(T entity)

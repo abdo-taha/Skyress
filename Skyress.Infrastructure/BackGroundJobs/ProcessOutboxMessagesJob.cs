@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Quartz;
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 using Skyress.Infrastructure.outbox;
 using Skyress.Infrastructure.Persistence;
 

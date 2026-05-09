@@ -1,15 +1,16 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Skyress.API.DTOs.Invoices;
 using Skyress.Application.Invoices.Commands.UpdateInvoiceCustomerId;
 using Skyress.Application.Invoices.Commands.UpdateInvoiceState;
-using Skyress.Domain.Aggregates.Invoice;
+using Skyress.Application.Invoices.Responses;
 
 namespace Skyress.API.Endpoints.Invoices;
 
 public static class UpdateInvoiceEndpoints
 {
-    public static async Task<Results<Ok<Invoice>, NotFound, BadRequest<string>>> UpdateInvoiceCustomerIdAsync(
+    public static async Task<Results<Ok<InvoiceResponse>, NotFound, UnprocessableEntity<ProblemDetails>>> UpdateInvoiceCustomerIdAsync(
         long id,
         UpdateInvoiceCustomerIdRequest request,
         ISender sender,
@@ -19,11 +20,16 @@ public static class UpdateInvoiceEndpoints
         if (result.IsFailure)
             return result.Error.Code.EndsWith(".NotFound")
                 ? TypedResults.NotFound()
-                : TypedResults.BadRequest(result.Error.Message);
+                : TypedResults.UnprocessableEntity(new ProblemDetails
+                {
+                    Title = "Validation Error",
+                    Detail = result.Error.Message,
+                    Status = StatusCodes.Status422UnprocessableEntity
+                });
         return TypedResults.Ok(result.Value);
     }
-    
-    public static async Task<Results<Ok<Invoice>, NotFound, BadRequest<string>>> UpdateInvoiceStateAsync(
+
+    public static async Task<Results<Ok<InvoiceResponse>, NotFound, UnprocessableEntity<ProblemDetails>>> UpdateInvoiceStateAsync(
         long id,
         UpdateInvoiceStateRequest request,
         ISender sender,
@@ -33,7 +39,12 @@ public static class UpdateInvoiceEndpoints
         if (result.IsFailure)
             return result.Error.Code.EndsWith(".NotFound")
                 ? TypedResults.NotFound()
-                : TypedResults.BadRequest(result.Error.Message);
+                : TypedResults.UnprocessableEntity(new ProblemDetails
+                {
+                    Title = "Validation Error",
+                    Detail = result.Error.Message,
+                    Status = StatusCodes.Status422UnprocessableEntity
+                });
         return TypedResults.Ok(result.Value);
     }
 }

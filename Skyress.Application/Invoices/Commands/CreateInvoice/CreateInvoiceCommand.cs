@@ -1,29 +1,35 @@
 namespace Skyress.Application.Invoices.Commands.CreateInvoice;
 
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
+using Skyress.Application.Invoices.Responses;
 using Skyress.Domain.Aggregates.Invoice;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
 
 public record CreateInvoiceCommand(
     long BasketId,
-    InvoiceState State = InvoiceState.Draft) : ICommand<Invoice>;
+    InvoiceState State = InvoiceState.Draft) : ICommand<InvoiceResponse>;
 
-public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand, Invoice>
+public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand, InvoiceResponse>
 {
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IBasketRepository _basketRepository;
+    private readonly ILogger<CreateInvoiceCommandHandler> _logger;
 
-    public CreateInvoiceCommandHandler(IInvoiceRepository invoiceRepository, IBasketRepository basketRepository)
+    public CreateInvoiceCommandHandler(IInvoiceRepository invoiceRepository, IBasketRepository basketRepository, ILogger<CreateInvoiceCommandHandler> logger)
     {
         _invoiceRepository = invoiceRepository;
         _basketRepository = basketRepository;
+        _logger = logger;
     }
 
-    public async Task<Result<Invoice>> Handle(CreateInvoiceCommand request, CancellationToken cancellationToken)
+    public async Task<Result<InvoiceResponse>> Handle(CreateInvoiceCommand request, CancellationToken cancellationToken)
     {
-        var basket = await this._basketRepository.GetByIdAsync(request.BasketId);
+        _logger.LogInformation("Handling {Command}", nameof(CreateInvoiceCommand));
+
+        var basket = await _basketRepository.GetByIdAsync(request.BasketId, cancellationToken);
         var invoice = new Invoice
         {
             BasketId = request.BasketId,
@@ -32,9 +38,9 @@ public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand,
             State = request.State,
         };
 
-        var createdInvoice = await _invoiceRepository.CreateAsync(invoice);
+        var createdInvoice = await _invoiceRepository.CreateAsync(invoice, cancellationToken);
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        
-        return Result.Success(createdInvoice);
+        _logger.LogInformation("{Command} completed. Id: {Id}", nameof(CreateInvoiceCommand), createdInvoice.Id);
+        return Result.Success(InvoiceResponse.FromDomain(createdInvoice));
     }
 }

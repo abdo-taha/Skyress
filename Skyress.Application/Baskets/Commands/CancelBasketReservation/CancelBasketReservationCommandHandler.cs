@@ -1,25 +1,20 @@
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
 
 namespace Skyress.Application.Baskets.Commands.CancelBasketReservation;
 
-public sealed class CancelBasketReservationCommandHandler : ICommandHandler<CancelBasketReservationCommand>
+public sealed class CancelBasketReservationCommandHandler(IBasketRepository basketRepository, IItemRepository itemRepository, ILogger<CancelBasketReservationCommandHandler> logger) : ICommandHandler<CancelBasketReservationCommand>
 {
-    private readonly IBasketRepository _basketRepository;
-    private readonly IItemRepository _itemRepository;
-
-    public CancelBasketReservationCommandHandler(IBasketRepository basketRepository, IItemRepository itemRepository)
-    {
-        _basketRepository = basketRepository;
-        _itemRepository = itemRepository;
-    }
+    private readonly ILogger<CancelBasketReservationCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(CancelBasketReservationCommand request, CancellationToken cancellationToken)
     {
-        var basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
+        _logger.LogInformation("Handling {Command} for BasketId: {Id}", nameof(CancelBasketReservationCommand), request.BasketId);
+
+        var basket = await basketRepository.GetBasketWithItemsAsync(request.BasketId);
         if (basket is null)
         {
             return Result.Failure(new Error("Basket.NotFound", "The basket was not found."));
@@ -30,10 +25,8 @@ public sealed class CancelBasketReservationCommandHandler : ICommandHandler<Canc
             return Result.Failure(new Error("Basket.InvalidState", "Basket is not in reserved or checked out state for cancellation."));
         }
 
-
         var itemIds = basket.BasketItems.Select(bi => bi.ItemId).ToList();
-        var items = (await _itemRepository.GetByIdsAsync(itemIds)).ToDictionary(item => item.Id);
-
+        var items = (await itemRepository.GetByIdsAsync(itemIds)).ToDictionary(item => item.Id);
 
         foreach (var basketItem in basket.BasketItems)
         {
@@ -44,14 +37,14 @@ public sealed class CancelBasketReservationCommandHandler : ICommandHandler<Canc
             }
         }
 
-
         var cancelResult = basket.CancelCheckout();
         if (cancelResult.IsFailure)
         {
             return Result.Failure(cancelResult.Error);
         }
 
-        await _basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("{Command} completed. BasketId: {Id}", nameof(CancelBasketReservationCommand), request.BasketId);
         return Result.Success();
     }
 } 

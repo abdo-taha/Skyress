@@ -1,4 +1,4 @@
-﻿using Skyress.Domain.Aggregates.TagAssignmnet;
+﻿using Skyress.Domain.Aggregates.TagAssignment;
 
 namespace Skyress.Application.Contracts.Persistence;
 

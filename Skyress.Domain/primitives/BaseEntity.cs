@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace Skyress.Domain.primitives;
+namespace Skyress.Domain.Primitives;
 
 public abstract class BaseEntity
 {

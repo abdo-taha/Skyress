@@ -1,30 +1,36 @@
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.Tag;
+using Skyress.Application.Tags.Responses;
 using Skyress.Domain.Common;
 
 namespace Skyress.Application.Tags.Queries.GetTagById;
 
-public record GetTagByIdQuery(long Id) : IQuery<Tag>;
+public record GetTagByIdQuery(long Id) : IQuery<TagResponse>;
 
-public class GetTagByIdQueryHandler : IQueryHandler<GetTagByIdQuery, Tag>
+public class GetTagByIdQueryHandler : IQueryHandler<GetTagByIdQuery, TagResponse>
 {
     private readonly ITagRepository _tagRepository;
+    private readonly ILogger<GetTagByIdQueryHandler> _logger;
 
-    public GetTagByIdQueryHandler(ITagRepository tagRepository)
+    public GetTagByIdQueryHandler(ITagRepository tagRepository, ILogger<GetTagByIdQueryHandler> logger)
     {
         _tagRepository = tagRepository;
+        _logger = logger;
     }
 
-    public async Task<Result<Tag>> Handle(GetTagByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TagResponse>> Handle(GetTagByIdQuery request, CancellationToken cancellationToken)
     {
-        var tag = await _tagRepository.GetByIdAsync(request.Id);
+        _logger.LogInformation("Handling {Command}", nameof(GetTagByIdQuery));
+
+        var tag = await _tagRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (tag is null || tag.IsDeleted)
         {
-            return Result<Tag>.Failure(new Error("", ""));
+            return Result<TagResponse>.Failure(new Error("", ""));
         }
 
-        return Result.Success(tag);
+        _logger.LogInformation("{Command} completed. Id: {Id}", nameof(GetTagByIdQuery), tag.Id);
+        return Result.Success(TagResponse.FromDomain(tag));
     }
 }

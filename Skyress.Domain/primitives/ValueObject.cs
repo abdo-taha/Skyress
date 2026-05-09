@@ -1,4 +1,4 @@
-﻿namespace Skyress.Domain.primitives;
+﻿namespace Skyress.Domain.Primitives;
 
 public abstract class ValueObject : IEquatable<ValueObject>
 {

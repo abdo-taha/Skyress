@@ -1,5 +1,5 @@
 ﻿using Skyress.Domain.Enums;
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 using Skyress.Domain.Aggregates.Item.Events;
 using Skyress.Domain.Common;
 

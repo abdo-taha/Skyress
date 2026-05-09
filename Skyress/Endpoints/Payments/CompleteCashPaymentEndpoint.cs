@@ -8,7 +8,7 @@ namespace Skyress.API.Endpoints.Payments;
 
 public static class CompleteCashPaymentEndpoint
 {
-    public static async Task<Results<Ok, NotFound, BadRequest<string>>> CompleteCashPaymentAsync(
+    public static async Task<Results<Ok, NotFound, UnprocessableEntity<ProblemDetails>>> CompleteCashPaymentAsync(
         [FromRoute] long id,
         CompletePaymentRequest request,
         ISender sender,
@@ -18,7 +18,12 @@ public static class CompleteCashPaymentEndpoint
 
         if (result.IsFailure)
         {
-            return TypedResults.BadRequest(result.Error.Message);
+            return TypedResults.UnprocessableEntity(new ProblemDetails
+            {
+                Title = "Validation Error",
+                Detail = result.Error.Message,
+                Status = StatusCodes.Status422UnprocessableEntity
+            });
         }
 
         return TypedResults.Ok();

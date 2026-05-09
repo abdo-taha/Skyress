@@ -1,5 +1,5 @@
 ﻿using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.TagAssignmnet;
+using Skyress.Domain.Aggregates.TagAssignment;
 using Skyress.Infrastructure.Persistence;
 
 namespace Skyress.Infrastructure.Repository;

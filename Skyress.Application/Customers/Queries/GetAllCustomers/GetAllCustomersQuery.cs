@@ -1,18 +1,25 @@
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.Customer;
+using Skyress.Application.Customers.Responses;
 using Skyress.Domain.Common;
 
 namespace Skyress.Application.Customers.Queries.GetAllCustomers;
 
-public record GetAllCustomersQuery() : IQuery<List<Customer>>;
+public record GetAllCustomersQuery() : IQuery<IReadOnlyList<CustomerResponse>>;
 
-public class GetAllCustomersQueryHandler(ICustomerRepository customerRepository)
-    : IQueryHandler<GetAllCustomersQuery, List<Customer>>
+public class GetAllCustomersQueryHandler(ICustomerRepository customerRepository, ILogger<GetAllCustomersQueryHandler> logger)
+    : IQueryHandler<GetAllCustomersQuery, IReadOnlyList<CustomerResponse>>
 {
-    public async Task<Result<List<Customer>>> Handle(GetAllCustomersQuery request, CancellationToken cancellationToken)
+    private readonly ILogger<GetAllCustomersQueryHandler> _logger = logger;
+
+    public async Task<Result<IReadOnlyList<CustomerResponse>>> Handle(GetAllCustomersQuery request, CancellationToken cancellationToken)
     {
-        var customers = await customerRepository.GetAllAsync();
-        return Result.Success(customers.Where(c => !c.IsDeleted).ToList());
+        _logger.LogInformation("Handling {Command}", nameof(GetAllCustomersQuery));
+
+        var customers = await customerRepository.GetAllAsync(cancellationToken);
+        var response = customers.Where(c => !c.IsDeleted).Select(CustomerResponse.FromDomain).ToList().AsReadOnly();
+        _logger.LogInformation("{Command} completed. Count: {Count}", nameof(GetAllCustomersQuery), response.Count);
+        return Result.Success<IReadOnlyList<CustomerResponse>>(response);
     }
 }

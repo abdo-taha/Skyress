@@ -1,4 +1,5 @@
 using Skyress.API.Extenstions;
+using Skyress.API.Middleware;
 using Serilog;
 using Skyress.API.Endpoints.Items;
 using Skyress.API.Endpoints.Customers;
@@ -17,6 +18,8 @@ builder.Host.UseSerilog((context, configuration) =>
 
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSerilogRequestLogging();
 

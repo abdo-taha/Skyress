@@ -1,4 +1,4 @@
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 
 namespace Skyress.Domain.Aggregates.Basket;
 

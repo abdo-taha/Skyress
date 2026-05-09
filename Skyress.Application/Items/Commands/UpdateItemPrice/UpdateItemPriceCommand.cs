@@ -1,35 +1,41 @@
 namespace Skyress.Application.Items.Commands.UpdateItemPrice;
 
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.Item;
+using Skyress.Application.Items.Responses;
 using Skyress.Domain.Common;
 
 public record UpdateItemPriceCommand(
     long Id,
     decimal? Price,
-    decimal? CostPrice) : ICommand<Item>;
+    decimal? CostPrice) : ICommand<ItemResponse>;
 
-public class UpdateItemPriceCommandHandler : ICommandHandler<UpdateItemPriceCommand, Item>
+public class UpdateItemPriceCommandHandler : ICommandHandler<UpdateItemPriceCommand, ItemResponse>
 {
     private readonly IItemRepository _itemRepository;
+    private readonly ILogger<UpdateItemPriceCommandHandler> _logger;
 
-    public UpdateItemPriceCommandHandler(IItemRepository itemRepository)
+    public UpdateItemPriceCommandHandler(IItemRepository itemRepository, ILogger<UpdateItemPriceCommandHandler> logger)
     {
         _itemRepository = itemRepository;
+        _logger = logger;
     }
 
-    public async Task<Result<Item>> Handle(UpdateItemPriceCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ItemResponse>> Handle(UpdateItemPriceCommand request, CancellationToken cancellationToken)
     {
-        var existingItem = await _itemRepository.GetByIdAsync(request.Id);
+        _logger.LogInformation("Handling {Command}", nameof(UpdateItemPriceCommand));
+
+        var existingItem = await _itemRepository.GetByIdAsync(request.Id, cancellationToken);
         if (existingItem is null)
         {
-            return Result<Item>.Failure(new Error("UpdateItemPrice.NotFound", "Item not found"));
+            return Result<ItemResponse>.Failure(new Error("UpdateItemPrice.NotFound", "Item not found"));
         }
 
         existingItem.UpdatePrice(request.Price, request.CostPrice);
-        
+
         await _itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(existingItem);
+        _logger.LogInformation("{Command} completed", nameof(UpdateItemPriceCommand));
+        return Result.Success(ItemResponse.FromDomain(existingItem));
     }
 }

@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Application.Invoices.Commands.AddSoldItemToInvoice;
@@ -18,17 +19,21 @@ public class BuildInvoiceFromBasketCommandHandler : ICommandHandler<BuildInvoice
     private readonly IBasketRepository _basketRepository;
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IMediator _mediator;
+    private readonly ILogger<BuildInvoiceFromBasketCommandHandler> _logger;
 
-    public BuildInvoiceFromBasketCommandHandler(IBasketRepository basketRepository, IMediator mediator, IInvoiceRepository invoiceRepository)
+    public BuildInvoiceFromBasketCommandHandler(IBasketRepository basketRepository, IMediator mediator, IInvoiceRepository invoiceRepository, ILogger<BuildInvoiceFromBasketCommandHandler> logger)
     {
         _basketRepository = basketRepository;
         _mediator = mediator;
         _invoiceRepository = invoiceRepository;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(BuildInvoiceFromBasketCommand request, CancellationToken cancellationToken)
     {
-        Basket? basket = await this._basketRepository.GetBasketWithItemsAsync(request.BasketId);
+        _logger.LogInformation("Handling {Command}", nameof(BuildInvoiceFromBasketCommand));
+
+        Basket? basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
         if (basket == null)
         {
             throw new Exception();
@@ -36,6 +41,7 @@ public class BuildInvoiceFromBasketCommandHandler : ICommandHandler<BuildInvoice
         await AddSoldItemToInvoice(basket, request.InvoiceId);
         await UpdateInvoiceStatus(request.InvoiceId);
 
+        _logger.LogInformation("{Command} completed", nameof(BuildInvoiceFromBasketCommand));
         return Result.Success();
     }
 
@@ -45,18 +51,18 @@ public class BuildInvoiceFromBasketCommandHandler : ICommandHandler<BuildInvoice
         {
             AddSoldItemToInvoiceCommand command = new AddSoldItemToInvoiceCommand(invoiceId,
                 basketBasketItem.ItemId, basketBasketItem.Quantity);
-            await this._mediator.Send(command);
+            await _mediator.Send(command);
         }
     }
 
     private async Task UpdateInvoiceStatus(long invoiceId)
     {
-        Invoice? invoice = await this._invoiceRepository.GetByIdAsync(invoiceId);
+        Invoice? invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
         if (invoice == null)
         {
             throw new Exception();
         }
         invoice.State = InvoiceState.Issued;
-        await this._invoiceRepository.UnitOfWork.SaveChangesAsync();
+        await _invoiceRepository.UnitOfWork.SaveChangesAsync();
     }
-} 
+}

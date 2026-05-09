@@ -1,24 +1,28 @@
 namespace Skyress.Application.Items.Queries.GetItemById;
 
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.Item;
+using Skyress.Application.Items.Responses;
 using Skyress.Domain.Common;
 
-public record GetItemByIdQuery(long Id) : IQuery<Item>;
+public record GetItemByIdQuery(long Id) : IQuery<ItemResponse>;
 
-// todo move to file
-// todo add errors
-public class GetItemByIdQueryHandler(IItemRepository itemRepository) : IQueryHandler<GetItemByIdQuery, Item>
+public class GetItemByIdQueryHandler(IItemRepository itemRepository, ILogger<GetItemByIdQueryHandler> logger) : IQueryHandler<GetItemByIdQuery, ItemResponse>
 {
-    public async Task<Result<Item>> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
+    private readonly ILogger<GetItemByIdQueryHandler> _logger = logger;
+
+    public async Task<Result<ItemResponse>> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
     {
-        var item = await itemRepository.GetByIdAsync(request.Id);
+        _logger.LogInformation("Handling {Command}", nameof(GetItemByIdQuery));
+
+        var item = await itemRepository.GetByIdAsync(request.Id, cancellationToken);
         if (item is null)
         {
-            return Result<Item>.Failure(new Error("GetItemById.NotFound", "Item not found"));
+            return Result<ItemResponse>.Failure(new Error("GetItemById.NotFound", "Item not found"));
         }
 
-        return Result.Success(item);
+        _logger.LogInformation("{Command} completed. Id: {Id}", nameof(GetItemByIdQuery), item.Id);
+        return Result.Success(ItemResponse.FromDomain(item));
     }
-} 
+}

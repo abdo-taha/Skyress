@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Skyress.Domain.Aggregates.TagAssignmnet;
+using Skyress.Domain.Aggregates.TagAssignment;
 
 namespace Skyress.Infrastructure.Configurations
 {

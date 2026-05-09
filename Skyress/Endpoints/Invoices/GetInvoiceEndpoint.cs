@@ -1,13 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Skyress.Application.Invoices.Queries.GetInvoiceById;
-using Skyress.Domain.Aggregates.Invoice;
+using Skyress.Application.Invoices.Responses;
 
 namespace Skyress.API.Endpoints.Invoices;
 
 public static class GetInvoiceEndpoint
 {
-    public static async Task<Results<Ok<Invoice>, NotFound>> GetInvoiceByIdAsync(
+    public static async Task<Results<Ok<InvoiceResponse>, NotFound>> GetInvoiceByIdAsync(
         long id,
         ISender sender,
         CancellationToken cancellationToken)

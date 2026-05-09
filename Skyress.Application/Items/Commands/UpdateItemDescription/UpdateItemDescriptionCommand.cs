@@ -1,27 +1,33 @@
 namespace Skyress.Application.Items.Commands.UpdateItemDescription;
 
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
-using Skyress.Domain.Aggregates.Item;
+using Skyress.Application.Items.Responses;
 using Skyress.Domain.Common;
 
 public record UpdateItemDescriptionCommand(
     long Id,
-    string Description) : ICommand<Item>;
+    string Description) : ICommand<ItemResponse>;
 
-public class UpdateItemDescriptionCommandHandler(IItemRepository itemRepository) : ICommandHandler<UpdateItemDescriptionCommand, Item>
+public class UpdateItemDescriptionCommandHandler(IItemRepository itemRepository, ILogger<UpdateItemDescriptionCommandHandler> logger) : ICommandHandler<UpdateItemDescriptionCommand, ItemResponse>
 {
-    public async Task<Result<Item>> Handle(UpdateItemDescriptionCommand request, CancellationToken cancellationToken)
+    private readonly ILogger<UpdateItemDescriptionCommandHandler> _logger = logger;
+
+    public async Task<Result<ItemResponse>> Handle(UpdateItemDescriptionCommand request, CancellationToken cancellationToken)
     {
-        var existingItem = await itemRepository.GetByIdAsync(request.Id);
+        _logger.LogInformation("Handling {Command}", nameof(UpdateItemDescriptionCommand));
+
+        var existingItem = await itemRepository.GetByIdAsync(request.Id, cancellationToken);
         if (existingItem is null)
         {
-            return Result<Item>.Failure(new Error("UpdateItemDescription.NotFound", "Item not found"));
+            return Result<ItemResponse>.Failure(new Error("UpdateItemDescription.NotFound", "Item not found"));
         }
 
         existingItem.UpdateDescription(request.Description);
 
         await itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(existingItem);
+        _logger.LogInformation("{Command} completed", nameof(UpdateItemDescriptionCommand));
+        return Result.Success(ItemResponse.FromDomain(existingItem));
     }
 }

@@ -1,7 +1,9 @@
 namespace Skyress.Application.Items.Commands.CreateItem;
 
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
+using Skyress.Application.Items.Responses;
 using Skyress.Domain.Aggregates.Item;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
@@ -13,12 +15,15 @@ public record CreateItemCommand(
     Unit Unit,
     decimal? CostPrice,
     int QuantityLeft,
-    string? QrCode) : ICommand<Item>;
+    string? QrCode) : ICommand<ItemResponse>;
 
-public class CreateItemCommandHandler(IItemRepository itemRepository) : ICommandHandler<CreateItemCommand, Item>
+public class CreateItemCommandHandler(IItemRepository itemRepository, ILogger<CreateItemCommandHandler> logger) : ICommandHandler<CreateItemCommand, ItemResponse>
 {
-    public async Task<Result<Item>> Handle(CreateItemCommand request, CancellationToken cancellationToken)
+    private readonly ILogger<CreateItemCommandHandler> _logger = logger;
+
+    public async Task<Result<ItemResponse>> Handle(CreateItemCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Handling {Command}", nameof(CreateItemCommand));
 
         var item = Item.Create(
             request.Name,
@@ -30,8 +35,9 @@ public class CreateItemCommandHandler(IItemRepository itemRepository) : ICommand
             request.QrCode
         );
 
-        var createdItem = await itemRepository.CreateAsync(item);
+        var createdItem = await itemRepository.CreateAsync(item, cancellationToken);
         await itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(createdItem);
+        _logger.LogInformation("{Command} completed. Id: {Id}", nameof(CreateItemCommand), createdItem.Id);
+        return Result.Success(ItemResponse.FromDomain(createdItem));
     }
 }

@@ -17,7 +17,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 			.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 	}
 
-	public async Task<User?> GetByIdAsync(long userId, CancellationToken cancellationToken = default)
+	public new async Task<User?> GetByIdAsync(long userId, CancellationToken cancellationToken = default)
 	{
 		return await SkyressDbContext.Users
 			.Include(u => u.UserRoles)

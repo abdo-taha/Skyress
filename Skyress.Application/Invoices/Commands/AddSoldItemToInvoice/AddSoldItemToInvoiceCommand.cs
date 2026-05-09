@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Invoice;
@@ -16,24 +17,28 @@ public class AddSoldItemToInvoiceCommandHandler : ICommandHandler<AddSoldItemToI
 {
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IItemRepository _itemRepository;
+    private readonly ILogger<AddSoldItemToInvoiceCommandHandler> _logger;
 
-    public AddSoldItemToInvoiceCommandHandler(IInvoiceRepository invoiceRepository, IItemRepository itemRepository)
+    public AddSoldItemToInvoiceCommandHandler(IInvoiceRepository invoiceRepository, IItemRepository itemRepository, ILogger<AddSoldItemToInvoiceCommandHandler> logger)
     {
         _invoiceRepository = invoiceRepository;
         _itemRepository = itemRepository;
+        _logger = logger;
     }
 
     public async Task<Result<SoldItem>> Handle(AddSoldItemToInvoiceCommand request, CancellationToken cancellationToken)
     {
-        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId);
-        
+        _logger.LogInformation("Handling {Command}", nameof(AddSoldItemToInvoiceCommand));
+
+        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId, cancellationToken);
+
         if (invoice is null)
         {
             return Result<SoldItem>.Failure(new Error("Invoice.NotFound", "Invoice not found"));
         }
-        
-        var item = await _itemRepository.GetByIdAsync(request.ItemId);
-        
+
+        var item = await _itemRepository.GetByIdAsync(request.ItemId, cancellationToken);
+
         if (item is null)
         {
             return Result<SoldItem>.Failure(Error.Dummy);
@@ -53,7 +58,7 @@ public class AddSoldItemToInvoiceCommandHandler : ICommandHandler<AddSoldItemToI
 
         invoice.AddSoldItem(soldItem);
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        
+        _logger.LogInformation("{Command} completed", nameof(AddSoldItemToInvoiceCommand));
         return Result.Success(soldItem);
     }
-} 
+}

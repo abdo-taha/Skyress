@@ -1,4 +1,5 @@
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Application.Payments.Events;
@@ -7,22 +8,26 @@ using Skyress.Domain.Enums;
 
 namespace Skyress.Application.Payments.Commands.CompleteCashPayment;
 
-
 public record CompleteCashPaymentCommand(long PaymentId, decimal TotalPaid) : ICommand;
 
 public class CompleteCashPaymentCommandHandler : ICommandHandler<CompleteCashPaymentCommand>
 {
     private readonly IPaymentRepository _paymentRepository;
     private readonly IPublishEndpoint _publisher;
-    public CompleteCashPaymentCommandHandler(IPaymentRepository paymentRepository, IPublishEndpoint publisher)
+    private readonly ILogger<CompleteCashPaymentCommandHandler> _logger;
+
+    public CompleteCashPaymentCommandHandler(IPaymentRepository paymentRepository, IPublishEndpoint publisher, ILogger<CompleteCashPaymentCommandHandler> logger)
     {
         _paymentRepository = paymentRepository;
         _publisher = publisher;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(CompleteCashPaymentCommand request, CancellationToken cancellationToken)
     {
-        var payment = await _paymentRepository.GetByIdAsync(request.PaymentId);
+        _logger.LogInformation("Handling {Command}", nameof(CompleteCashPaymentCommand));
+
+        var payment = await _paymentRepository.GetByIdAsync(request.PaymentId, cancellationToken);
         if (payment is null)
         {
             return Result.Failure(Error.Dummy);
@@ -48,8 +53,8 @@ public class CompleteCashPaymentCommandHandler : ICommandHandler<CompleteCashPay
 
         await _paymentRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
-        await this._publisher.Publish(new PaymentCompletedEvent(request.PaymentId));
+        await _publisher.Publish(new PaymentCompletedEvent(request.PaymentId));
+        _logger.LogInformation("{Command} completed", nameof(CompleteCashPaymentCommand));
         return Result.Success(payment);
     }
-
 }

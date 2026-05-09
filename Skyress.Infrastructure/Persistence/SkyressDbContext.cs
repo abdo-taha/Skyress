@@ -8,10 +8,10 @@ using Skyress.Domain.Aggregates.Invoice;
 using Skyress.Domain.Aggregates.Item;
 using Skyress.Domain.Aggregates.Payment;
 using Skyress.Domain.Aggregates.Tag;
-using Skyress.Domain.Aggregates.TagAssignmnet;
+using Skyress.Domain.Aggregates.TagAssignment;
 using Skyress.Domain.Aggregates.Todo;
 using Skyress.Domain.Aggregates.Basket;
-using Skyress.Domain.primitives;
+using Skyress.Domain.Primitives;
 using Skyress.Infrastructure.outbox;
 
 namespace Skyress.Infrastructure.Persistence

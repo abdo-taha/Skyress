@@ -2,7 +2,7 @@ using MassTransit;
 using MediatR;
 using Skyress.Application.Checkout.Events;
 using Skyress.Application.Payments.Commands.CreatePayment;
-using Skyress.Domain.Aggregates.Payment;
+using Skyress.Application.Payments.Responses;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
 
@@ -19,7 +19,7 @@ public class CreatePaymentRequestedConsumer : IConsumer<CreatePaymentRequested>
 
     public async Task Consume(ConsumeContext<CreatePaymentRequested> context)
     {
-        Result<Payment> payment = await _mediator.Send(new CreatePaymentCommand(context.Message.InvoiceId, PaymentType.Cash));
+        Result<PaymentResponse> payment = await _mediator.Send(new CreatePaymentCommand(context.Message.InvoiceId, PaymentType.Cash));
         await context.Publish(new PaymentInitiated(context.Message.CorrelationId, payment.Value.Id));
     }
 }

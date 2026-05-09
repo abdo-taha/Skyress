@@ -1,18 +1,25 @@
 namespace Skyress.Application.Items.Queries.GetAllItems;
 
-using Contracts.Persistence;
-using Domain.Aggregates.Item;
-using Domain.Common;
-using Abstractions.Messaging;
+using Microsoft.Extensions.Logging;
+using Skyress.Application.Abstractions.Messaging;
+using Skyress.Application.Contracts.Persistence;
+using Skyress.Application.Items.Responses;
+using Skyress.Domain.Common;
 
-public record GetAllItemsQuery : IQuery<IReadOnlyList<Item>>;
+public record GetAllItemsQuery : IQuery<IReadOnlyList<ItemResponse>>;
 
-public class GetAllItemsQueryHandler(IItemRepository itemRepository)
-    : IQueryHandler<GetAllItemsQuery, IReadOnlyList<Item>>
+public class GetAllItemsQueryHandler(IItemRepository itemRepository, ILogger<GetAllItemsQueryHandler> logger)
+    : IQueryHandler<GetAllItemsQuery, IReadOnlyList<ItemResponse>>
 {
-    public async Task<Result<IReadOnlyList<Item>>> Handle(GetAllItemsQuery request, CancellationToken cancellationToken)
+    private readonly ILogger<GetAllItemsQueryHandler> _logger = logger;
+
+    public async Task<Result<IReadOnlyList<ItemResponse>>> Handle(GetAllItemsQuery request, CancellationToken cancellationToken)
     {
-        var items = await itemRepository.GetAllAsync();
-        return Result.Success(items);
+        _logger.LogInformation("Handling {Command}", nameof(GetAllItemsQuery));
+
+        var items = await itemRepository.GetAllAsync(cancellationToken);
+        var response = items.Select(ItemResponse.FromDomain).ToList().AsReadOnly();
+        _logger.LogInformation("{Command} completed. Count: {Count}", nameof(GetAllItemsQuery), response.Count);
+        return Result.Success<IReadOnlyList<ItemResponse>>(response);
     }
 }
