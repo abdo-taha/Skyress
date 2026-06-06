@@ -28,8 +28,14 @@ public class UpdateInvoiceStateCommandHandler : ICommandHandler<UpdateInvoiceSta
 
         var invoice = await _invoiceRepository.GetByIdAsync(request.Id, cancellationToken);
         if (invoice is null)
-        {
             return Result<InvoiceResponse>.Failure(new Error("UpdateInvoiceState.NotFound", "Invoice not found"));
+
+        // Idempotency: no-op if invoice is already in the target state
+        if (invoice.State == request.State)
+        {
+            _logger.LogInformation("{Command} skipped — invoice already in state {State}",
+                nameof(UpdateInvoiceStateCommand), request.State);
+            return Result.Success(InvoiceResponse.FromDomain(invoice));
         }
 
         invoice.State = request.State;

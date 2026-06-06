@@ -30,19 +30,24 @@ public class AddSoldItemToInvoiceCommandHandler : ICommandHandler<AddSoldItemToI
     {
         _logger.LogInformation("Handling {Command}", nameof(AddSoldItemToInvoiceCommand));
 
-        var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId, cancellationToken);
+        // Load invoice WITH its sold items so we can check for duplicates
+        var invoice = await _invoiceRepository.GetByIdWithSoldItemsAsync(request.InvoiceId, cancellationToken);
 
         if (invoice is null)
-        {
             return Result<SoldItem>.Failure(new Error("Invoice.NotFound", "Invoice not found"));
+
+        // Idempotency: skip if a sold item for this item already exists in the invoice
+        var existingSoldItem = invoice.SoldItems.FirstOrDefault(si => si.ItemId == request.ItemId);
+        if (existingSoldItem is not null)
+        {
+            _logger.LogInformation("{Command} skipped — SoldItem already exists for ItemId {ItemId}",
+                nameof(AddSoldItemToInvoiceCommand), request.ItemId);
+            return Result.Success(existingSoldItem);
         }
 
         var item = await _itemRepository.GetByIdAsync(request.ItemId, cancellationToken);
-
         if (item is null)
-        {
             return Result<SoldItem>.Failure(Error.Dummy);
-        }
 
         var soldItem = new SoldItem
         {

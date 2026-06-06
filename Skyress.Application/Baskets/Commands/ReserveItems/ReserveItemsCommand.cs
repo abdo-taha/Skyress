@@ -22,24 +22,29 @@ public class ReserveItemsCommandHandler : ICommandHandler<ReserveItemsCommand>
     public async Task<Result> Handle(ReserveItemsCommand request, CancellationToken cancellationToken)
     {
         Basket? basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
-        // TODO validate state
         if (basket == null)
-        {
             throw new NullReferenceException();
-        }
 
         Dictionary<long, Item> items = await GetItems(basket);
+        bool anyReserved = false;
 
         foreach (BasketItem basketItem in basket.BasketItems)
         {
+            if (basketItem.IsReserved)
+                continue; // already done — skip
+
             Item item = items[basketItem.ItemId];
             Result reserveResult = item.ReserveQuantity(basketItem.Quantity);
             if (reserveResult.IsFailure)
-            {
                 throw new InvalidOperationException(reserveResult.Error.Message);
-            }
+
+            basketItem.MarkAsReserved();
+            anyReserved = true;
         }
-        await this._itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+        if (anyReserved)
+            await this._itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
     

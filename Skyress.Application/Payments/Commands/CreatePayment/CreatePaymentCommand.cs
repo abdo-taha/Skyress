@@ -34,8 +34,15 @@ public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand,
 
         var invoice = await _invoiceRepository.GetByIdAsync(request.InvoiceId, cancellationToken);
         if (invoice is null)
-        {
             return Result<PaymentResponse>.Failure(new Error("CreatePayment.InvoiceNotFound", "Invoice not found"));
+
+        // Idempotency: return existing payment if one already exists for this invoice
+        var existingPayment = await _paymentRepository.GetByInvoiceIdAsync(request.InvoiceId, cancellationToken);
+        if (existingPayment is not null)
+        {
+            _logger.LogInformation("{Command} skipped — payment already exists. Id: {Id}",
+                nameof(CreatePaymentCommand), existingPayment.Id);
+            return Result.Success(PaymentResponse.FromDomain(existingPayment));
         }
 
         var payment = new Payment

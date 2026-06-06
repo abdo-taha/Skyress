@@ -4,6 +4,7 @@ using Skyress.Application.Checkout.Events;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Common;
+using Skyress.Domain.Enums;
 namespace Skyress.Application.Baskets.Commands.InitiateCheckout;
 
 public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateCheckoutCommand>
@@ -20,21 +21,27 @@ public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateChe
     {
         var basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
         if (basket is null)
-        {
             throw new Exception();
+
+        // Already fully checked out — reject
+        if (basket.State == BasketState.CheckedOut)
+            return Result.Failure(new Error("Basket.AlreadyCheckedOut", "Basket has already been checked out."));
+
+        // Already in progress — republish with existing correlation ID (idempotent re-entry)
+        if (basket.State == BasketState.Reserved
+            && !string.IsNullOrEmpty(basket.CheckoutId)
+            && Guid.TryParse(basket.CheckoutId, out var existingId))
+        {
+            await _publisher.Publish(new CheckoutInitiated(existingId, request.BasketId));
+            return Result.Success();
         }
 
         if (basket.InitiateCheckout().IsFailure)
-        {
             throw new Exception();
-        }
 
         Guid correlationId = this.UpdateCheckoutId(basket);
-        
         await this._basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-        
         await this._publisher.Publish(new CheckoutInitiated(correlationId, request.BasketId));
-        
         return Result.Success();
     }
 

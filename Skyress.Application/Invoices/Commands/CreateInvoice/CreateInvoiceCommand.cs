@@ -29,6 +29,14 @@ public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand,
     {
         _logger.LogInformation("Handling {Command}", nameof(CreateInvoiceCommand));
 
+        // Idempotency: return existing invoice if one already exists for this basket
+        var existing = await _invoiceRepository.GetByBasketIdAsync(request.BasketId, cancellationToken);
+        if (existing is not null)
+        {
+            _logger.LogInformation("{Command} skipped — invoice already exists. Id: {Id}", nameof(CreateInvoiceCommand), existing.Id);
+            return Result.Success(InvoiceResponse.FromDomain(existing));
+        }
+
         var basket = await _basketRepository.GetByIdAsync(request.BasketId, cancellationToken);
         var invoice = new Invoice
         {

@@ -12,4 +12,10 @@ public class BasketItem(long basketId, long itemId, int quantity) : BaseEntity
     {
         Quantity += quantity;
     }
+
+    public bool IsReserved { get; private set; }
+    public bool IsSold { get; private set; }
+
+    public void MarkAsReserved() => IsReserved = true;
+    public void MarkAsSold() => IsSold = true;
 }

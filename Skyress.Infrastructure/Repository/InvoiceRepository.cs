@@ -15,5 +15,17 @@ namespace Skyress.Infrastructure.Repository
         {
             return await GetAsync(i => i.PaymentId == paymentId).FirstOrDefaultAsync();
         }
+
+        public async Task<Invoice?> GetByBasketIdAsync(long basketId, CancellationToken cancellationToken = default)
+        {
+            return await GetAsync(i => i.BasketId == basketId).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<Invoice?> GetByIdWithSoldItemsAsync(long invoiceId, CancellationToken cancellationToken = default)
+        {
+            return await SkyressDbContext.Invoices
+                .Include(i => i.SoldItems)
+                .FirstOrDefaultAsync(i => i.Id == invoiceId, cancellationToken);
+        }
     }
 }

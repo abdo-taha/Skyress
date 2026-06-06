@@ -110,5 +110,38 @@ public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
                 .Finalize());
 
         SetCompletedWhenFinalized();
+
+        // Discard duplicate CheckoutInitiated events when saga is already active
+        During(ReservingItems, Ignore(CheckoutInitiated));
+        During(InitiatingInvoice, Ignore(CheckoutInitiated));
+        During(BuildingInvoice, Ignore(CheckoutInitiated));
+        During(InitiatingPayment, Ignore(CheckoutInitiated));
+        During(PaymentPending, Ignore(CheckoutInitiated));
+        During(Finalizing, Ignore(CheckoutInitiated));
+
+        // Discard ItemsReserved when already past ReservingItems
+        During(InitiatingInvoice, Ignore(ItemsReservedEvent));
+        During(BuildingInvoice, Ignore(ItemsReservedEvent));
+        During(InitiatingPayment, Ignore(ItemsReservedEvent));
+        During(PaymentPending, Ignore(ItemsReservedEvent));
+        During(Finalizing, Ignore(ItemsReservedEvent));
+
+        // Discard InvoiceInitiated when already past InitiatingInvoice
+        During(BuildingInvoice, Ignore(InvoiceInitiatedEvent));
+        During(InitiatingPayment, Ignore(InvoiceInitiatedEvent));
+        During(PaymentPending, Ignore(InvoiceInitiatedEvent));
+        During(Finalizing, Ignore(InvoiceInitiatedEvent));
+
+        // Discard InvoiceCreated when already past BuildingInvoice
+        During(InitiatingPayment, Ignore(InvoiceCreatedEvent));
+        During(PaymentPending, Ignore(InvoiceCreatedEvent));
+        During(Finalizing, Ignore(InvoiceCreatedEvent));
+
+        // Discard PaymentInitiated when already past InitiatingPayment
+        During(PaymentPending, Ignore(PaymentInitiatedEvent));
+        During(Finalizing, Ignore(PaymentInitiatedEvent));
+
+        // Discard PaymentCompleted when saga has already advanced past it (late delivery)
+        During(Finalizing, Ignore(PaymentCompletedEvent));
     }
 }

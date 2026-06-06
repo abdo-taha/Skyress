@@ -33,6 +33,13 @@ public static  class SagaConfigurator
                         hst.Password(password:"guest");
                     });
                 cfg.UseInMemoryOutbox(context);
+
+                // Retry transient failures up to 3 times with exponential back-off
+                cfg.UseMessageRetry(r => r.Exponential(3,
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(2)));
+
                 cfg.ConfigureEndpoints(context);
             });
         });

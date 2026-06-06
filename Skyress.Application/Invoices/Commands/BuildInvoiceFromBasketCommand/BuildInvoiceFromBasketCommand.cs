@@ -59,9 +59,12 @@ public class BuildInvoiceFromBasketCommandHandler : ICommandHandler<BuildInvoice
     {
         Invoice? invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
         if (invoice == null)
-        {
             throw new Exception();
-        }
+
+        // Idempotency: skip if already issued or beyond
+        if (invoice.State >= InvoiceState.Issued)
+            return;
+
         invoice.State = InvoiceState.Issued;
         await _invoiceRepository.UnitOfWork.SaveChangesAsync();
     }

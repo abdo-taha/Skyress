@@ -22,29 +22,31 @@ public class MarkItemsAsSoldCommandHandler : ICommandHandler<MarkItemsAsSoldComm
     {
         var basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
         if (basket == null)
-        {
             return Result.Failure(Error.Dummy);
-        }
-        
+
         var itemIds = basket.BasketItems.Select(i => i.ItemId).ToList();
         var items = (await _itemRepository.GetByIdsAsync(itemIds)).ToDictionary(item => item.Id);
+        bool anyMarked = false;
 
         foreach (var soldItem in basket.BasketItems)
         {
-            if (!items.TryGetValue(soldItem.ItemId, out var item))
-            {
-                return Result.Failure(new Error("Item.NotFound", $"Item with ID {soldItem.ItemId} not found"));
-            }
+            if (soldItem.IsSold)
+                continue; // already done — skip
 
+            if (!items.TryGetValue(soldItem.ItemId, out var item))
+                return Result.Failure(new Error("Item.NotFound", $"Item with ID {soldItem.ItemId} not found"));
 
             Result result = item.MarkAsSold(soldItem.Quantity);
             if (result.IsFailure)
-            {
                 return Result.Failure(result.Error);
-            }
+
+            soldItem.MarkAsSold();
+            anyMarked = true;
         }
 
-        await _itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        if (anyMarked)
+            await _itemRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
 } 
