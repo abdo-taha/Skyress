@@ -19,7 +19,8 @@ public class ReserveItemsRequestedConsumer : IConsumer<ReserveItemsRequested>
     {
         Result result = await _mediator.Send(new ReserveItemsCommand(context.Message.BasketId));
         if (result.IsFailure)
-            throw new InvalidOperationException(result.Error.Message);
+            return;
+
         await context.Publish(new ItemsReserved(context.Message.CorrelationId));
     }
 }

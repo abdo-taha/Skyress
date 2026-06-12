@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Skyress.API.Endpoints;
 using Skyress.API.DTOs.Invoices;
 using Skyress.Application.Invoices.Commands.UpdateInvoiceCustomerId;
 using Skyress.Application.Invoices.Commands.UpdateInvoiceState;
@@ -17,16 +18,7 @@ public static class UpdateInvoiceEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new UpdateInvoiceCustomerIdCommand(id, request.CustomerId), cancellationToken);
-        if (result.IsFailure)
-            return result.Error.Code.EndsWith(".NotFound")
-                ? TypedResults.NotFound()
-                : TypedResults.UnprocessableEntity(new ProblemDetails
-                {
-                    Title = "Validation Error",
-                    Detail = result.Error.Message,
-                    Status = StatusCodes.Status422UnprocessableEntity
-                });
-        return TypedResults.Ok(result.Value);
+        return result.ToOkOrNotFoundOrUnprocessableEntity();
     }
 
     public static async Task<Results<Ok<InvoiceResponse>, NotFound, UnprocessableEntity<ProblemDetails>>> UpdateInvoiceStateAsync(
@@ -36,15 +28,6 @@ public static class UpdateInvoiceEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new UpdateInvoiceStateCommand(id, request.State), cancellationToken);
-        if (result.IsFailure)
-            return result.Error.Code.EndsWith(".NotFound")
-                ? TypedResults.NotFound()
-                : TypedResults.UnprocessableEntity(new ProblemDetails
-                {
-                    Title = "Validation Error",
-                    Detail = result.Error.Message,
-                    Status = StatusCodes.Status422UnprocessableEntity
-                });
-        return TypedResults.Ok(result.Value);
+        return result.ToOkOrNotFoundOrUnprocessableEntity();
     }
 }

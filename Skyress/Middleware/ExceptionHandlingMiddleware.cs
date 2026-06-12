@@ -26,12 +26,14 @@ public sealed class ExceptionHandlingMiddleware
         {
             _logger.LogWarning(ex, "Domain rule violation: {Message}", ex.Message);
             context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
-            await context.Response.WriteAsJsonAsync(new ProblemDetails
+            var problemDetails = new ProblemDetails
             {
                 Title = "Domain Rule Violation",
                 Detail = ex.Message,
                 Status = StatusCodes.Status422UnprocessableEntity
-            });
+            };
+            problemDetails.Extensions["code"] = ex.Code;
+            await context.Response.WriteAsJsonAsync(problemDetails);
         }
         catch (Exception ex)
         {

@@ -4,7 +4,7 @@ using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Application.Payments.Events;
 using Skyress.Domain.Common;
-using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Application.Payments.Commands.CompleteCashPayment;
 
@@ -33,28 +33,19 @@ public class CompleteCashPaymentCommandHandler : ICommandHandler<CompleteCashPay
             return Result.Failure(Error.Dummy);
         }
 
-        if (payment.PaymentType != PaymentType.Cash)
+        try
         {
-            return Result.Failure(Error.Dummy);
+            payment.CompleteCashPayment(request.TotalPaid);
         }
-
-        if (payment.PaymentState != PaymentState.Initiated)
+        catch (DomainException exception)
         {
-            return Result.Failure(Error.Dummy);
+            return DomainExceptionResultMapper.ToFailure(exception);
         }
-
-        if (payment.TotalDue != request.TotalPaid)
-        {
-            return Result.Failure(Error.Dummy);
-        }
-
-        payment.PaymentState = PaymentState.Paid;
-        payment.TotalPaid = payment.TotalDue;
 
         await _paymentRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
         await _publisher.Publish(new PaymentCompletedEvent(request.PaymentId));
         _logger.LogInformation("{Command} completed", nameof(CompleteCashPaymentCommand));
-        return Result.Success(payment);
+        return Result.Success();
     }
 }

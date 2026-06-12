@@ -3,6 +3,7 @@ using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Aggregates.Item;
 using Skyress.Domain.Common;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Application.Baskets.Commands.ReserveItems;
 
@@ -23,7 +24,7 @@ public class ReserveItemsCommandHandler : ICommandHandler<ReserveItemsCommand>
     {
         Basket? basket = await _basketRepository.GetBasketWithItemsAsync(request.BasketId);
         if (basket == null)
-            throw new NullReferenceException();
+            return Result.Failure(new Error("Basket.NotFound", "The basket was not found."));
 
         Dictionary<long, Item> items = await GetItems(basket);
         bool anyReserved = false;
@@ -33,10 +34,19 @@ public class ReserveItemsCommandHandler : ICommandHandler<ReserveItemsCommand>
             if (basketItem.IsReserved)
                 continue; // already done — skip
 
-            Item item = items[basketItem.ItemId];
-            Result reserveResult = item.ReserveQuantity(basketItem.Quantity);
-            if (reserveResult.IsFailure)
-                throw new InvalidOperationException(reserveResult.Error.Message);
+            if (!items.TryGetValue(basketItem.ItemId, out Item? item))
+            {
+                return Result.Failure(new Error("Item.NotFound", $"Item {basketItem.ItemId} was not found."));
+            }
+
+            try
+            {
+                item.ReserveQuantity(basketItem.Quantity);
+            }
+            catch (DomainException exception)
+            {
+                return DomainExceptionResultMapper.ToFailure(exception);
+            }
 
             basketItem.MarkAsReserved();
             anyReserved = true;

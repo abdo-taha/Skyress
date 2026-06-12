@@ -39,6 +39,10 @@ namespace Skyress.Infrastructure.Configurations
             builder.HasIndex(b => b.PaymentId)
                 .IsUnique()
                 .HasDatabaseName("IX_Invoice_PaymentId");
+
+            builder.HasIndex(i => i.BasketId)
+                .IsUnique()
+                .HasDatabaseName("IX_Invoice_BasketId");
         }
     }
 }

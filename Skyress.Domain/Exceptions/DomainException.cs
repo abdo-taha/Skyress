@@ -1,10 +1,12 @@
-﻿namespace Skyress.Domain.Exceptions;
+namespace Skyress.Domain.Exceptions;
 
 public class DomainException : Exception
 {
-    protected DomainException(string message)
+    public DomainException(string code, string message)
         : base(message)
     {
+        Code = code;
     }
-}
 
+    public string Code { get; }
+}

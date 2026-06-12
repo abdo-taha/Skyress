@@ -5,6 +5,7 @@ using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 namespace Skyress.Application.Baskets.Commands.InitiateCheckout;
 
 public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateCheckoutCommand>
@@ -36,24 +37,18 @@ public sealed class InitiateCheckoutCommandHandler : ICommandHandler<InitiateChe
             return Result.Success();
         }
 
-        if (basket.InitiateCheckout().IsFailure)
-            throw new Exception();
+        try
+        {
+            basket.InitiateCheckout();
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure(exception);
+        }
 
-        Guid correlationId = this.UpdateCheckoutId(basket);
+        Guid correlationId = basket.EnsureCheckoutId();
         await this._basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         await this._publisher.Publish(new CheckoutInitiated(correlationId, request.BasketId));
         return Result.Success();
-    }
-
-    private Guid UpdateCheckoutId(Basket basket)
-    {
-        if (Guid.TryParse(basket.CheckoutId, out Guid checkoutId) && checkoutId != Guid.Empty)
-        {
-            return checkoutId;
-        }
-
-        Guid newCheckoutId = Guid.NewGuid();
-        basket.CheckoutId = newCheckoutId.ToString();
-        return newCheckoutId;
     }
 }

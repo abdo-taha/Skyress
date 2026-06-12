@@ -38,9 +38,10 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
 	public async Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
 	{
+		var tokenHash = RefreshToken.Hash(token);
 		return await SkyressDbContext.RefreshTokens
 			.Include(rt => rt.User)
-			.FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
+			.FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash, cancellationToken);
 	}
 
 	public async Task<List<RefreshToken>> GetRefreshTokensByFamilyIdAsync(Guid familyId, CancellationToken cancellationToken = default)

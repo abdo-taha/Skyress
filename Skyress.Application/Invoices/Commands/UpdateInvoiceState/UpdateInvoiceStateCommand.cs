@@ -6,6 +6,7 @@ using Skyress.Application.Contracts.Persistence;
 using Skyress.Application.Invoices.Responses;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 public record UpdateInvoiceStateCommand(
     long Id,
@@ -38,7 +39,14 @@ public class UpdateInvoiceStateCommandHandler : ICommandHandler<UpdateInvoiceSta
             return Result.Success(InvoiceResponse.FromDomain(invoice));
         }
 
-        invoice.State = request.State;
+        try
+        {
+            invoice.UpdateState(request.State);
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure<InvoiceResponse>(exception);
+        }
 
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("{Command} completed", nameof(UpdateInvoiceStateCommand));

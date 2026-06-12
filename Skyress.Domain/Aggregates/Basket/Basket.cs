@@ -1,6 +1,7 @@
 using Skyress.Domain.Primitives;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Domain.Aggregates.Basket;
 
@@ -8,11 +9,11 @@ public class Basket : AggregateRoot
 {
     public long? UserId { get; set; }
 
-    public BasketState State { get; set; } = BasketState.Active;
+    public BasketState State { get; private set; } = BasketState.Active;
     
-    public long? InvoiceId { get; set; }
+    public long? InvoiceId { get; private set; }
     
-    public string? CheckoutId { get; set; }
+    public string? CheckoutId { get; private set; }
     
     private readonly List<BasketItem> _basketItems = new();
     
@@ -22,7 +23,7 @@ public class Basket : AggregateRoot
     {
         if (State != BasketState.Active)
         {
-            return Result.Failure(new Error("Basket.InvalidState", "Cannot add items to basket in current state."));
+            throw new BasketInvalidStateException("Cannot add items to basket in current state.");
         }
 
         var existingItem = _basketItems.FirstOrDefault(bi => bi.ItemId == itemId);
@@ -31,7 +32,7 @@ public class Basket : AggregateRoot
         {
             if (quantity > existingItem.Quantity)
             {
-                return Result.Failure(Error.Dummy);
+                throw new BasketInvalidStateException("Cannot remove more items than exist in the basket.");
             }
             
             existingItem.AddQuantity(quantity);
@@ -45,7 +46,7 @@ public class Basket : AggregateRoot
         {
             if (quantity < 1)
             {
-                return Result.Failure(Error.Dummy);
+                throw new BasketInvalidStateException("Cannot add a non-positive item quantity.");
             }
             _basketItems.Add(new BasketItem(Id, itemId, quantity));
         }
@@ -57,14 +58,14 @@ public class Basket : AggregateRoot
     {
         if (State != BasketState.Active)
         {
-            return Result.Failure(new Error("Basket.InvalidState", "Cannot remove items from basket in current state."));
+            throw new BasketInvalidStateException("Cannot remove items from basket in current state.");
         }
 
         var itemToRemove = _basketItems.FirstOrDefault(bi => bi.ItemId == itemId);
 
         if (itemToRemove is null)
         { 
-            return Result.Failure(Error.Dummy); 
+            throw new BasketInvalidStateException("Cannot remove an item that is not in the basket.");
         }
 
         _basketItems.Remove(itemToRemove);
@@ -84,23 +85,45 @@ public class Basket : AggregateRoot
     {
         if (State != BasketState.Active && State != BasketState.Cancelled)
         {
-            return Result.Failure(Error.Dummy);
+            throw new BasketInvalidStateException("Cannot initiate checkout for basket in current state.");
         }
 
         if (!_basketItems.Any())
         {
-            return Result.Failure(Error.Dummy);
+            throw new BasketEmptyException();
         }
 
         State = BasketState.Reserved;
         return Result.Success();
+    }
+
+    public Guid EnsureCheckoutId()
+    {
+        if (Guid.TryParse(CheckoutId, out Guid checkoutId) && checkoutId != Guid.Empty)
+        {
+            return checkoutId;
+        }
+
+        Guid newCheckoutId = Guid.NewGuid();
+        CheckoutId = newCheckoutId.ToString();
+        return newCheckoutId;
+    }
+
+    public void AttachInvoice(long invoiceId)
+    {
+        if (InvoiceId is not null && InvoiceId != invoiceId)
+        {
+            throw new BasketInvalidStateException("Basket already has a different invoice attached.");
+        }
+
+        InvoiceId = invoiceId;
     }
     
     public Result CompleteCheckout()
     {
         if (State != BasketState.Reserved)
         {
-            return Result.Failure(Error.Dummy);
+            throw new BasketInvalidStateException("Cannot complete checkout for basket in current state.");
         }
 
         State = BasketState.CheckedOut;
@@ -111,7 +134,7 @@ public class Basket : AggregateRoot
     {
         if (State != BasketState.Reserved)
         {
-            return Result.Failure(Error.Dummy);
+            throw new BasketInvalidStateException("Cannot cancel checkout for basket in current state.");
         }
 
         State = BasketState.Cancelled;

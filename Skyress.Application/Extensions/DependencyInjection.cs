@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Skyress.Application.Behaviors;
 
 namespace Skyress.Application.Extensions;
 
@@ -12,6 +14,7 @@ public static class DependencyInjection
             configuration.RegisterServicesFromAssembly(assembly)
         );
         services.AddValidatorsFromAssembly(assembly);
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         return services;
     }
 }

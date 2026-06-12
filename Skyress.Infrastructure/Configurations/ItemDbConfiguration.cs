@@ -47,6 +47,9 @@ namespace Skyress.Infrastructure.Configurations
 
             builder.Property(i => i.CreatedAt)
                 .IsRequired();
+
+            builder.Property(i => i.RowVersion)
+                .IsRowVersion();
         }
     }
 }

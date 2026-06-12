@@ -16,8 +16,15 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 			.IsRequired()
 			.HasMaxLength(500);
 
-		builder.HasIndex(rt => rt.Token)
+		builder.Property(rt => rt.TokenHash)
+			.IsRequired()
+			.HasMaxLength(128);
+
+		builder.HasIndex(rt => rt.TokenHash)
 			.IsUnique();
+
+		builder.Property(rt => rt.RowVersion)
+			.IsRowVersion();
 
 		builder.HasIndex(rt => rt.FamilyId);
 

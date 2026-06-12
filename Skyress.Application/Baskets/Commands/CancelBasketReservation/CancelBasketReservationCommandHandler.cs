@@ -3,6 +3,7 @@ using Skyress.Application.Abstractions.Messaging;
 using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Application.Baskets.Commands.CancelBasketReservation;
 
@@ -37,10 +38,13 @@ public sealed class CancelBasketReservationCommandHandler(IBasketRepository bask
             }
         }
 
-        var cancelResult = basket.CancelCheckout();
-        if (cancelResult.IsFailure)
+        try
         {
-            return Result.Failure(cancelResult.Error);
+            basket.CancelCheckout();
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure(exception);
         }
 
         await basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

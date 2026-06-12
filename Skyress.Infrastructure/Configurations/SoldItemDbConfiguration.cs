@@ -51,6 +51,11 @@ namespace Skyress.Infrastructure.Configurations
                 .WithMany(i => i.SoldItems)
                 .HasForeignKey(si => si.InvoiceId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(si => new { si.InvoiceId, si.ItemId })
+                .IsUnique()
+                .HasFilter("\"ItemId\" IS NOT NULL")
+                .HasDatabaseName("IX_SoldItem_InvoiceId_ItemId");
         }
     }
 } 

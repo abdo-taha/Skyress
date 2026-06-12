@@ -19,18 +19,18 @@ public class PaymentCompletedConsumer : IConsumer<PaymentCompletedEvent>
         _basketRepository = basketRepository;
     }
 
-    public async Task Consume(ConsumeContext<PaymentCompletedEvent> context)
+    public async Task Consume(ConsumeContext<PaymentCompletedEvent> context) // TODO: what does this step do?
     {
         var invoice = await this._invoiceRepository.GetByPaymentId(context.Message.PaymentId);
         if (invoice == null)
         {
-            throw new Exception();
+            return;
         }
 
         var basket = await this._basketRepository.GetByIdAsync(invoice.BasketId);
         if (basket is null || string.IsNullOrEmpty(basket.CheckoutId))
         {
-            throw new Exception();
+            return;
         }
 
         await this._publisher.Publish(new CheckoutPaymentCompleted(Guid.Parse(basket.CheckoutId)));

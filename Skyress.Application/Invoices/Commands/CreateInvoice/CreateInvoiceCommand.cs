@@ -38,13 +38,7 @@ public class CreateInvoiceCommandHandler : ICommandHandler<CreateInvoiceCommand,
         }
 
         var basket = await _basketRepository.GetByIdAsync(request.BasketId, cancellationToken);
-        var invoice = new Invoice
-        {
-            BasketId = request.BasketId,
-            CustomerId = basket?.UserId,
-            TotalAmount = 0,
-            State = request.State,
-        };
+        var invoice = Invoice.Create(request.BasketId, basket?.UserId, request.State);
 
         var createdInvoice = await _invoiceRepository.CreateAsync(invoice, cancellationToken);
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

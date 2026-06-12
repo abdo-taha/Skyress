@@ -7,6 +7,7 @@ using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Aggregates.Invoice;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Application.Invoices.Commands.BuildInvoiceFromBasketCommand;
 
@@ -38,34 +39,58 @@ public class BuildInvoiceFromBasketCommandHandler : ICommandHandler<BuildInvoice
         {
             throw new Exception();
         }
-        await AddSoldItemToInvoice(basket, request.InvoiceId);
-        await UpdateInvoiceStatus(request.InvoiceId);
+        var soldItemsResult = await AddSoldItemToInvoice(basket, request.InvoiceId, cancellationToken);
+        if (soldItemsResult.IsFailure)
+        {
+            return soldItemsResult;
+        }
+
+        var invoiceStatusResult = await UpdateInvoiceStatus(request.InvoiceId, cancellationToken);
+        if (invoiceStatusResult.IsFailure)
+        {
+            return invoiceStatusResult;
+        }
 
         _logger.LogInformation("{Command} completed", nameof(BuildInvoiceFromBasketCommand));
         return Result.Success();
     }
 
-    private async Task AddSoldItemToInvoice(Basket basket, long invoiceId)
+    private async Task<Result> AddSoldItemToInvoice(Basket basket, long invoiceId, CancellationToken cancellationToken)
     {
         foreach (BasketItem basketBasketItem in basket.BasketItems)
         {
             AddSoldItemToInvoiceCommand command = new AddSoldItemToInvoiceCommand(invoiceId,
                 basketBasketItem.ItemId, basketBasketItem.Quantity);
-            await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
+            if (result.IsFailure)
+            {
+                return Result.Failure(result.Error);
+            }
         }
+
+        return Result.Success();
     }
 
-    private async Task UpdateInvoiceStatus(long invoiceId)
+    private async Task<Result> UpdateInvoiceStatus(long invoiceId, CancellationToken cancellationToken)
     {
-        Invoice? invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
+        Invoice? invoice = await _invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
         if (invoice == null)
-            throw new Exception();
+            return Result.Failure(new Error("Invoice.NotFound", "Invoice not found"));
 
         // Idempotency: skip if already issued or beyond
         if (invoice.State >= InvoiceState.Issued)
-            return;
+            return Result.Success();
 
-        invoice.State = InvoiceState.Issued;
-        await _invoiceRepository.UnitOfWork.SaveChangesAsync();
+        try
+        {
+            invoice.Issue();
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure(exception);
+        }
+
+        await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
     }
 }

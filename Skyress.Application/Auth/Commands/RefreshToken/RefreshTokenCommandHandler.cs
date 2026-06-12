@@ -26,7 +26,7 @@ public class RefreshTokenCommandHandler(
 			var family = await userRepository.GetRefreshTokensByFamilyIdAsync(refreshToken.FamilyId, cancellationToken);
 			foreach (var token in family)
 			{
-				token.IsRevoked = true;
+				token.Revoke();
 			}
 			foreach (var token in family)
 			{
@@ -50,8 +50,7 @@ public class RefreshTokenCommandHandler(
 		var (newAccessToken, newRefreshTokenValue, newRefreshTokenEntity) =
 			jwtTokenService.CreateTokenPair(user, roles, refreshToken.FamilyId);
 
-		refreshToken.IsUsed = true;
-		refreshToken.ReplacedByToken = newRefreshTokenValue;
+		refreshToken.MarkUsed(newRefreshTokenValue);
 		await userRepository.UpdateRefreshTokenAsync(refreshToken, cancellationToken);
 
 		user.RefreshTokens.Add(newRefreshTokenEntity);

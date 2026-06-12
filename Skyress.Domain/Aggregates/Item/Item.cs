@@ -2,6 +2,7 @@
 using Skyress.Domain.Primitives;
 using Skyress.Domain.Aggregates.Item.Events;
 using Skyress.Domain.Common;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Domain.Aggregates.Item
 {
@@ -22,6 +23,7 @@ namespace Skyress.Domain.Aggregates.Item
         public string? LastEditBy { get; set; }
         public DateTime LastEditDate { get; set; }
         public DateTime CreatedAt { get; set; }
+        public byte[] RowVersion { get; private set; } = [];
         
         public bool IsDeleted { get; private set; }
 
@@ -113,8 +115,7 @@ namespace Skyress.Domain.Aggregates.Item
         {
             if (QuantityLeft - QuantityReserved < quantity)
             {
-                return Result.Failure(new Error("Item.InsufficientStock", 
-                    $"Insufficient available stock. Available: {QuantityLeft - QuantityReserved}, Requested: {quantity}"));
+                throw new ItemInsufficientStockException(QuantityLeft - QuantityReserved, quantity);
             }
 
             QuantityReserved += quantity;
@@ -125,8 +126,7 @@ namespace Skyress.Domain.Aggregates.Item
         {
             if (QuantityReserved < quantity)
             {
-                return Result.Failure(new Error("Item.InvalidReservation", 
-                    $"Cannot release more than reserved. Reserved: {QuantityReserved}, Requested: {quantity}"));
+                throw new ItemInvalidReservationException(QuantityReserved, quantity);
             }
 
             QuantityReserved -= quantity;
@@ -137,7 +137,7 @@ namespace Skyress.Domain.Aggregates.Item
         {
             if (quantity > QuantityLeft || quantity > QuantityReserved)
             {
-                return Result.Failure(Error.Dummy);
+                throw new ItemInvalidSaleException();
             }
             QuantityReserved -= quantity;
             QuantityLeft -= quantity;

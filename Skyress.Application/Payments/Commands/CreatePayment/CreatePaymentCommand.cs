@@ -7,6 +7,7 @@ using Skyress.Application.Payments.Responses;
 using Skyress.Domain.Aggregates.Payment;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 public record CreatePaymentCommand(
     long InvoiceId,
@@ -45,19 +46,28 @@ public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand,
             return Result.Success(PaymentResponse.FromDomain(existingPayment));
         }
 
-        var payment = new Payment
+        Payment payment;
+        try
         {
-            InvoiceId = request.InvoiceId,
-            TotalPaid = 0,
-            TotalDue = invoice.TotalAmount,
-            PaymentType = request.PaymentType,
-            PaymentState = PaymentState.Initiated
-        };
+            payment = Payment.Create(request.InvoiceId, invoice.TotalAmount, request.PaymentType);
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure<PaymentResponse>(exception);
+        }
 
         var createdPayment = await _paymentRepository.CreateAsync(payment, cancellationToken);
         await _paymentRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
-        invoice.PaymentId = createdPayment.Id;
+        try
+        {
+            invoice.AttachPayment(createdPayment.Id);
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure<PaymentResponse>(exception);
+        }
+
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("{Command} completed. Id: {Id}", nameof(CreatePaymentCommand), createdPayment.Id);
         return Result.Success(PaymentResponse.FromDomain(createdPayment));

@@ -14,7 +14,7 @@ public class LogoutCommandHandler(
 
 		if (refreshToken is { IsRevoked: false })
 		{
-			refreshToken.IsRevoked = true;
+			refreshToken.Revoke();
 			await userRepository.UpdateRefreshTokenAsync(refreshToken, cancellationToken);
 		}
 

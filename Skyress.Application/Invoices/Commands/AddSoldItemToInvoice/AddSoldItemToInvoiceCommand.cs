@@ -4,6 +4,7 @@ using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Invoice;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Application.Invoices.Commands.AddSoldItemToInvoice;
 
@@ -61,7 +62,15 @@ public class AddSoldItemToInvoiceCommandHandler : ICommandHandler<AddSoldItemToI
             ItemCost = item.CostPrice,
         };
 
-        invoice.AddSoldItem(soldItem);
+        try
+        {
+            invoice.AddSoldItem(soldItem);
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure<SoldItem>(exception);
+        }
+
         await _invoiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("{Command} completed", nameof(AddSoldItemToInvoiceCommand));
         return Result.Success(soldItem);

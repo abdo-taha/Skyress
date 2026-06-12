@@ -3,6 +3,7 @@ using Skyress.Application.Contracts.Persistence;
 using Skyress.Domain.Aggregates.Basket;
 using Skyress.Domain.Common;
 using Skyress.Domain.Enums;
+using Skyress.Domain.Exceptions;
 
 namespace Skyress.Application.Baskets.Commands.CompleteCheckout;
 
@@ -25,7 +26,15 @@ public sealed class CompleteCheckoutCommandHandler : ICommandHandler<CompleteChe
         if (result.Value.State == BasketState.CheckedOut)
             return Result.Success();
 
-        result.Value.CompleteCheckout();
+        try
+        {
+            result.Value.CompleteCheckout();
+        }
+        catch (DomainException exception)
+        {
+            return DomainExceptionResultMapper.ToFailure(exception);
+        }
+
         await this._basketRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }

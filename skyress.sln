@@ -13,6 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skyress.Infrastructure", "S
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{331E7A49-2B54-444B-8746-9DD85A1B8DF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skyress.Domain.Tests", "Skyress.Domain.Tests\Skyress.Domain.Tests.csproj", "{0244EC48-5FA0-4169-BE4A-27D869D41BB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skyress.Application.Tests", "Skyress.Application.Tests\Skyress.Application.Tests.csproj", "{9A1C99DC-603C-4E6E-9ADB-C65286A9AFC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skyress.Infrastructure.Tests", "Skyress.Infrastructure.Tests\Skyress.Infrastructure.Tests.csproj", "{12FC34E4-9471-478C-8924-AF757737E352}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +45,18 @@ Global
 		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{331E7A49-2B54-444B-8746-9DD85A1B8DF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0244EC48-5FA0-4169-BE4A-27D869D41BB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0244EC48-5FA0-4169-BE4A-27D869D41BB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0244EC48-5FA0-4169-BE4A-27D869D41BB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0244EC48-5FA0-4169-BE4A-27D869D41BB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A1C99DC-603C-4E6E-9ADB-C65286A9AFC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A1C99DC-603C-4E6E-9ADB-C65286A9AFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A1C99DC-603C-4E6E-9ADB-C65286A9AFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A1C99DC-603C-4E6E-9ADB-C65286A9AFC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12FC34E4-9471-478C-8924-AF757737E352}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12FC34E4-9471-478C-8924-AF757737E352}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12FC34E4-9471-478C-8924-AF757737E352}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12FC34E4-9471-478C-8924-AF757737E352}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
