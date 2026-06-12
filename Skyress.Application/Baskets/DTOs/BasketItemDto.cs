@@ -8,6 +8,6 @@ public class BasketItemDto
     public long ItemId { get; set; }
     public int Quantity { get; set; }
     public decimal Price { get; set; }
-    public string? Name { get; set; }
+    public string? Name { get; set; } // TODO add values 
     public Unit? Unit { get; set; }
 }

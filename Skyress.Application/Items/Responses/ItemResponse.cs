@@ -22,7 +22,7 @@ public sealed record ItemResponse(
         item.Name,
         item.Description,
         item.Price,
-        item.CostPrice,
+        item.CostPrice, // TODO remove from customer api
         item.QuantityLeft,
         item.QuantityReserved,
         item.QuantitySold,

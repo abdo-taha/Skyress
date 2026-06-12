@@ -1,0 +1,280 @@
+{
+  "info": {
+    "_postman_id": "2f801e76-0f90-49f6-8b9d-5f6a3b8d2c11",
+    "name": "Skyress Full API + Checkout Flow",
+    "description": "Postman collection covering Skyress auth, catalog, customers, baskets, invoices, payments, tags, tag assignments, todos, and the checkout saga flow.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+    { "key": "apiVersion", "value": "1.0", "type": "string" },
+    { "key": "customerEmail", "value": "customer@example.com", "type": "string" },
+    { "key": "customerPassword", "value": "P@ssw0rd123!", "type": "string" },
+    { "key": "adminEmail", "value": "admin@skyress.local", "type": "string" },
+    { "key": "adminPassword", "value": "Admin@12345!", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "customerId", "value": "", "type": "string" },
+    { "key": "itemId", "value": "", "type": "string" },
+    { "key": "basketId", "value": "", "type": "string" },
+    { "key": "invoiceId", "value": "", "type": "string" },
+    { "key": "paymentId", "value": "", "type": "string" },
+    { "key": "tagId", "value": "", "type": "string" },
+    { "key": "tagAssignmentId", "value": "", "type": "string" },
+    { "key": "todoId", "value": "", "type": "string" },
+    { "key": "totalDue", "value": "", "type": "string" },
+    { "key": "quantity", "value": "2", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "00 - Auth",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('register returned an expected status', function () { pm.expect([200, 201, 409, 500]).to.include(pm.response.code); });",
+            "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('accessToken', json.accessToken || json.AccessToken || ''); pm.collectionVariables.set('refreshToken', json.refreshToken || json.RefreshToken || ''); }"
+          ] } }]
+        },
+        {
+          "name": "Login Customer",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('customer login returned token', function () { pm.response.to.have.status(200); });",
+            "const json = pm.response.json(); pm.collectionVariables.set('accessToken', json.accessToken || json.AccessToken || ''); pm.collectionVariables.set('refreshToken', json.refreshToken || json.RefreshToken || '');"
+          ] } }]
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('admin login returned token', function () { pm.response.to.have.status(200); });",
+            "const json = pm.response.json(); pm.collectionVariables.set('adminToken', json.accessToken || json.AccessToken || '');"
+          ] } }]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code === 200) { const json = pm.response.json(); pm.collectionVariables.set('accessToken', json.accessToken || json.AccessToken || ''); pm.collectionVariables.set('refreshToken', json.refreshToken || json.RefreshToken || ''); }"
+          ] } }]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Items",
+      "item": [
+        { "name": "Get All Items", "request": { "method": "GET", "url": "{{baseUrl}}/api/items?api-version={{apiVersion}}" } },
+        { "name": "Get Item By Id", "request": { "method": "GET", "url": "{{baseUrl}}/api/items/{{itemId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Item By Id V2", "request": { "method": "GET", "url": "{{baseUrl}}/api/items/{{itemId}}?api-version=2.0" } },
+        { "name": "Get Item Pricing History", "request": { "method": "GET", "url": "{{baseUrl}}/api/items/pricingHistory{{itemId}}?api-version={{apiVersion}}" } },
+        {
+          "name": "Create Item (Admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Test Item\",\n  \"description\": \"Inventory item for API testing\",\n  \"price\": 49.50,\n  \"unit\": 0,\n  \"quantityLeft\": 25,\n  \"costPrice\": 20.00,\n  \"qrCode\": \"POSTMAN-TEST-ITEM\"\n}" },
+            "url": "{{baseUrl}}/api/items?api-version={{apiVersion}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('itemId', json.id || json.Id); }"
+          ] } }]
+        },
+        { "name": "Update Item Name (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Postman Item\"\n}" }, "url": "{{baseUrl}}/api/items/{{itemId}}/name?api-version={{apiVersion}}" } },
+        { "name": "Update Item Description (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated by Postman\"\n}" }, "url": "{{baseUrl}}/api/items/{{itemId}}/description?api-version={{apiVersion}}" } },
+        { "name": "Update Item Price (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"price\": 55.00,\n  \"costPrice\": 22.00\n}" }, "url": "{{baseUrl}}/api/items/{{itemId}}/price?api-version={{apiVersion}}" } },
+        { "name": "Update Item Quantity Left (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quantityLeft\": 40\n}" }, "url": "{{baseUrl}}/api/items/{{itemId}}/quantityLeft?api-version={{apiVersion}}" } },
+        { "name": "Update Item QR Code (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"qrCode\": \"POSTMAN-UPDATED-QR\"\n}" }, "url": "{{baseUrl}}/api/items/{{itemId}}/qrcode?api-version={{apiVersion}}" } },
+        { "name": "Update Item Unit (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"unit\": 0\n}" }, "url": "{{baseUrl}}/api/items/{{itemId}}/unit?api-version={{apiVersion}}" } },
+        { "name": "Delete Item (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "DELETE", "url": "{{baseUrl}}/api/items/{{itemId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "02 - Customers",
+      "item": [
+        { "name": "Get All Customers (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/customers?api-version={{apiVersion}}" } },
+        { "name": "Get Customer By Id (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/customers/{{customerId}}?api-version={{apiVersion}}" } },
+        {
+          "name": "Create Customer (Admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Customer\",\n  \"notes\": \"Created by full API collection\",\n  \"state\": 0\n}" },
+            "url": "{{baseUrl}}/api/customers?api-version={{apiVersion}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('customerId', json.id || json.Id); }"
+          ] } }]
+        },
+        { "name": "Update Customer State (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"id\": {{customerId}},\n  \"state\": 0\n}" }, "url": "{{baseUrl}}/api/customers/state?api-version={{apiVersion}}" } },
+        { "name": "Update Customer Notes (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"id\": {{customerId}},\n  \"notes\": \"Updated by Postman\"\n}" }, "url": "{{baseUrl}}/api/customers/notes?api-version={{apiVersion}}" } },
+        { "name": "Delete Customer (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "DELETE", "url": "{{baseUrl}}/api/customers/{{customerId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "03 - Baskets",
+      "item": [
+        {
+          "name": "Create Basket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerId\": {{customerId}}\n}" },
+            "url": "{{baseUrl}}/api/baskets?api-version={{apiVersion}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('basketId', json.id || json.Id); }"
+          ] } }]
+        },
+        { "name": "Get Basket By Id", "request": { "method": "GET", "url": "{{baseUrl}}/api/baskets/{{basketId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Baskets By Customer (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/baskets/customer/{{customerId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Baskets By State (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/baskets/state/0?api-version={{apiVersion}}" } },
+        { "name": "Add Item To Basket", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"itemId\": {{itemId}},\n  \"quantity\": {{quantity}}\n}" }, "url": "{{baseUrl}}/api/baskets/{{basketId}}/items?api-version={{apiVersion}}" } },
+        { "name": "Remove Item From Basket", "request": { "method": "DELETE", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"itemId\": {{itemId}}\n}" }, "url": "{{baseUrl}}/api/baskets/{{basketId}}/items?api-version={{apiVersion}}" } },
+        { "name": "Clear Basket", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/baskets/{{basketId}}/clear?api-version={{apiVersion}}" } },
+        { "name": "Cancel Basket Reservation", "request": { "method": "POST", "url": "{{baseUrl}}/api/baskets/{{basketId}}/cancel-reservation?api-version={{apiVersion}}" } },
+        { "name": "Initiate Checkout", "request": { "method": "POST", "url": "{{baseUrl}}/api/baskets/initiate-checkout?basketId={{basketId}}&api-version={{apiVersion}}" } },
+        { "name": "Delete Basket", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/baskets/{{basketId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "04 - Invoices",
+      "item": [
+        { "name": "Get All Invoices (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices?api-version={{apiVersion}}" } },
+        { "name": "Get Invoice By Id (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices/{{invoiceId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Invoices By Customer (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices/customer/{{customerId}}?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code === 200) { const basketId = String(pm.collectionVariables.get('basketId')); const list = pm.response.json(); const invoice = Array.isArray(list) ? list.find(x => String(x.basketId || x.BasketId) === basketId) : null; if (invoice) { pm.collectionVariables.set('invoiceId', invoice.id || invoice.Id); const paymentId = invoice.paymentId || invoice.PaymentId; if (paymentId) pm.collectionVariables.set('paymentId', paymentId); } }"
+        ] } }] },
+        { "name": "Get Invoices By State (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices/state/0?api-version={{apiVersion}}" } },
+        { "name": "Get Invoice With Payments (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/withPayments?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code === 200) { const json = pm.response.json(); const payments = json.payments || json.Payments || []; const payment = payments[0]; if (payment) { pm.collectionVariables.set('paymentId', payment.id || payment.Id); pm.collectionVariables.set('totalDue', payment.totalDue || payment.TotalDue); } }"
+        ] } }] },
+        { "name": "Update Invoice Customer Id (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"customerId\": {{customerId}}\n}" }, "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/customerId?api-version={{apiVersion}}" } },
+        { "name": "Update Invoice State (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"state\": 1\n}" }, "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/state?api-version={{apiVersion}}" } },
+        { "name": "Delete Invoice (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "DELETE", "url": "{{baseUrl}}/api/invoices/{{invoiceId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "05 - Payments",
+      "item": [
+        { "name": "Get All Payments (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/payments?api-version={{apiVersion}}" } },
+        { "name": "Get Payment By Id (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/payments/{{paymentId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Payments By Invoice (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/payments/invoice/{{invoiceId}}?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code === 200) { const payments = pm.response.json(); const payment = Array.isArray(payments) ? payments[0] : payments; if (payment) { pm.collectionVariables.set('paymentId', payment.id || payment.Id); pm.collectionVariables.set('totalDue', payment.totalDue || payment.TotalDue); } }"
+        ] } }] },
+        { "name": "Complete Cash Payment (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"amount\": {{totalDue}}\n}" }, "url": "{{baseUrl}}/api/payments/{{paymentId}}/Pay?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "06 - Tags",
+      "item": [
+        { "name": "Get All Tags", "request": { "method": "GET", "url": "{{baseUrl}}/api/tags?api-version={{apiVersion}}" } },
+        { "name": "Get Tag By Id", "request": { "method": "GET", "url": "{{baseUrl}}/api/tags/{{tagId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Tags By Type", "request": { "method": "GET", "url": "{{baseUrl}}/api/tags/type/0?api-version={{apiVersion}}" } },
+        { "name": "Create Tag (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Tag\",\n  \"type\": 0\n}" }, "url": "{{baseUrl}}/api/tags?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('tagId', json.id || json.Id); }"
+        ] } }] },
+        { "name": "Update Tag Name (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Postman Tag\"\n}" }, "url": "{{baseUrl}}/api/tags/{{tagId}}/name?api-version={{apiVersion}}" } },
+        { "name": "Update Tag Type (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"type\": 0\n}" }, "url": "{{baseUrl}}/api/tags/{{tagId}}/type?api-version={{apiVersion}}" } },
+        { "name": "Delete Tag (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "DELETE", "url": "{{baseUrl}}/api/tags/{{tagId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "07 - Tag Assignments",
+      "item": [
+        { "name": "Get Assignments By Item", "request": { "method": "GET", "url": "{{baseUrl}}/api/tagAssignments/item/{{itemId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Assignments By Tag", "request": { "method": "GET", "url": "{{baseUrl}}/api/tagAssignments/tag/{{tagId}}?api-version={{apiVersion}}" } },
+        { "name": "Create Tag Assignment (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tagId\": {{tagId}},\n  \"itemId\": {{itemId}}\n}" }, "url": "{{baseUrl}}/api/tagAssignments?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('tagAssignmentId', json.id || json.Id); }"
+        ] } }] },
+        { "name": "Delete Tag Assignment (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "DELETE", "url": "{{baseUrl}}/api/tagAssignments/{{tagAssignmentId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "08 - Todos",
+      "item": [
+        { "name": "Get All Todos", "request": { "method": "GET", "url": "{{baseUrl}}/api/todos?api-version={{apiVersion}}" } },
+        { "name": "Get Todo By Id", "request": { "method": "GET", "url": "{{baseUrl}}/api/todos/{{todoId}}?api-version={{apiVersion}}" } },
+        { "name": "Get Todos By State", "request": { "method": "GET", "url": "{{baseUrl}}/api/todos/state/0?api-version={{apiVersion}}" } },
+        { "name": "Create Todo", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"context\": \"Postman todo\"\n}" }, "url": "{{baseUrl}}/api/todos?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('todoId', json.id || json.Id); }"
+        ] } }] },
+        { "name": "Update Todo State", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"state\": 1\n}" }, "url": "{{baseUrl}}/api/todos/{{todoId}}/state?api-version={{apiVersion}}" } },
+        { "name": "Update Todo Context", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"context\": \"Updated Postman todo\"\n}" }, "url": "{{baseUrl}}/api/todos/{{todoId}}/context?api-version={{apiVersion}}" } },
+        { "name": "Delete Todo", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/todos/{{todoId}}?api-version={{apiVersion}}" } }
+      ]
+    },
+    {
+      "name": "09 - Checkout Flow Runner",
+      "description": "Run these in order after Login Admin. Retry invoice/payment lookups because saga processing is asynchronous.",
+      "item": [
+        { "name": "1. Create Item (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Checkout Flow Item\",\n  \"description\": \"Item created for checkout flow test\",\n  \"price\": 49.50,\n  \"unit\": 0,\n  \"quantityLeft\": 25,\n  \"costPrice\": 20.00,\n  \"qrCode\": \"CHECKOUT-FLOW-ITEM\"\n}" }, "url": "{{baseUrl}}/api/items?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('itemId', json.id || json.Id); }"
+        ] } }] },
+        { "name": "2. Create Customer (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Checkout Flow Customer\",\n  \"notes\": \"Created for checkout flow\",\n  \"state\": 0\n}" }, "url": "{{baseUrl}}/api/customers?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('customerId', json.id || json.Id); }"
+        ] } }] },
+        { "name": "3. Create Basket", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"customerId\": {{customerId}}\n}" }, "url": "{{baseUrl}}/api/baskets?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code >= 200 && pm.response.code < 300) { const json = pm.response.json(); pm.collectionVariables.set('basketId', json.id || json.Id); }"
+        ] } }] },
+        { "name": "4. Add Item To Basket", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"itemId\": {{itemId}},\n  \"quantity\": {{quantity}}\n}" }, "url": "{{baseUrl}}/api/baskets/{{basketId}}/items?api-version={{apiVersion}}" } },
+        { "name": "5. Initiate Checkout", "request": { "method": "POST", "url": "{{baseUrl}}/api/baskets/initiate-checkout?basketId={{basketId}}&api-version={{apiVersion}}" } },
+        { "name": "6. Find Invoice By Customer (Admin, retry)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices/customer/{{customerId}}?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code === 200) { const basketId = String(pm.collectionVariables.get('basketId')); const list = pm.response.json(); const invoice = Array.isArray(list) ? list.find(x => String(x.basketId || x.BasketId) === basketId) : null; if (invoice) { pm.collectionVariables.set('invoiceId', invoice.id || invoice.Id); const paymentId = invoice.paymentId || invoice.PaymentId; if (paymentId) pm.collectionVariables.set('paymentId', paymentId); } }"
+        ] } }] },
+        { "name": "7. Get Invoice With Payments (Admin, retry)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/withPayments?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "if (pm.response.code === 200) { const json = pm.response.json(); const payments = json.payments || json.Payments || []; const payment = payments[0]; if (payment) { pm.collectionVariables.set('paymentId', payment.id || payment.Id); pm.collectionVariables.set('totalDue', payment.totalDue || payment.TotalDue); } }"
+        ] } }] },
+        { "name": "8. Complete Cash Payment (Admin)", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"amount\": {{totalDue}}\n}" }, "url": "{{baseUrl}}/api/payments/{{paymentId}}/Pay?api-version={{apiVersion}}" } },
+        { "name": "9. Verify Basket Checked Out (retry)", "request": { "method": "GET", "url": "{{baseUrl}}/api/baskets/{{basketId}}?api-version={{apiVersion}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+          "pm.test('basket loaded', function () { pm.response.to.have.status(200); });",
+          "const json = pm.response.json(); const state = json.state ?? json.State; pm.test('basket state is CheckedOut when saga is complete', function () { pm.expect(state).to.eql(2); });"
+        ] } }] }
+      ]
+    }
+  ]
+}

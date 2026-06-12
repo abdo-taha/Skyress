@@ -17,11 +17,11 @@ public static class BasketApiRegistration
             .Build();
         var api = app.MapGroup("api/baskets").WithApiVersionSet(versionSet).WithTags("Baskets");
 
-        api.MapPost("/", CreateBasketEndpoint.CreateBasketAsync);
+        api.MapPost("/", CreateBasketEndpoint.CreateBasketAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
 
-        api.MapGet("{id:long}", GetBasketByIdEndpoint.GetBasketByIdAsync);
+        api.MapGet("{id:long}", GetBasketByIdEndpoint.GetBasketByIdAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
 
-        api.MapPost("{id:long}/items", AddItemToBasketEndpoint.AddItemToBasketAsync);
+        api.MapPost("{id:long}/items", AddItemToBasketEndpoint.AddItemToBasketAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
         // Listing all customers' baskets is Admin-only; full per-customer isolation
         // requires a User→Customer link which is out of scope for v1.
         api.MapGet("/customer/{customerId:long?}", GetBasketsByCustomerEndpoint.GetBasketsByCustomerAsync)
@@ -35,15 +35,15 @@ public static class BasketApiRegistration
         api.MapGet("/state/{state}", GetBasketsByStateEndpoint.GetBasketsByStateAsync)
             .RequireAuthorization(p => p.RequireRole("Admin"));
 
-        api.MapPatch("{id:long}/clear", ClearBasketEndpoint.ClearBasketAsync);
+        api.MapPatch("{id:long}/clear", ClearBasketEndpoint.ClearBasketAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
 
-        api.MapDelete("{id:long}", DeleteBasketEndpoint.DeleteBasketAsync);
+        api.MapDelete("{id:long}", DeleteBasketEndpoint.DeleteBasketAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
 
-        api.MapDelete("{id:long}/items", RemoveItemFromBasketEndpoint.RemoveItemFromBasketAsync);
+        api.MapDelete("{id:long}/items", RemoveItemFromBasketEndpoint.RemoveItemFromBasketAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
 
 
-        api.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync);
+        api.MapPost("{id:long}/cancel-reservation", CancelBasketReservationEndpoint.CancelBasketReservationAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
 
-        api.MapPost("initiate-checkout", InitiateCheckoutBasketEndpoint.InitiateCheckoutBasketAsync);
+        api.MapPost("initiate-checkout", InitiateCheckoutBasketEndpoint.InitiateCheckoutBasketAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
     }
 }

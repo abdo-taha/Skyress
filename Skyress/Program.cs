@@ -10,6 +10,7 @@ using Skyress.API.Endpoints.Todos;
 using Skyress.API.Endpoints.TagAssignments;
 using Skyress.API.Endpoints.Baskets;
 using Skyress.Endpoints.Auth;
+using Skyress.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -52,5 +53,7 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+
+await app.Services.SeedDefaultIdentityAsync(app.Configuration);
 
 app.Run();

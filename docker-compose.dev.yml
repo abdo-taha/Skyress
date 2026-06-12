@@ -9,6 +9,9 @@ services:
     container_name: skyress
     environment:
       - ConnectionStrings__SkyressDb=Host=skyress.db;Port=5432;Database=Skyress;Username=Skyress;Password=Skyress
+      - Jwt__SecretKey=development-only-skyress-jwt-secret-key-change-before-production
+      - DefaultAdmin__Email=admin@skyress.local
+      - DefaultAdmin__Password=Admin@12345!
     depends_on:
       skyress.db:
         condition: service_healthy

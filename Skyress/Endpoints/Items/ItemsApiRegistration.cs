@@ -22,7 +22,7 @@ public static class ItemsApiRegistration
         // Query endpoints
         api.MapGet("/", GetAllItemsEndpoint.GetAllItemsAsync);
         api.MapGet("{id:long}", GetItemByIdEndpoint.GetItemByIdAsync);
-        api.MapGet("/pricingHistory{id:long}", GetItemPricingHistoryEndpoint.GetItemPricingHistoryAsync);
+        api.MapGet("/pricingHistory{id:long}", GetItemPricingHistoryEndpoint.GetItemPricingHistoryAsync).RequireAuthorization(p => p.RequireRole("Admin"));;
         
         // Command endpoints — Admin only
         api.MapPost("/", CreateItemEndpoint.CreateItemAsync).RequireAuthorization(p => p.RequireRole("Admin"));

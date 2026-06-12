@@ -22,6 +22,11 @@ public class RegisterCommandHandler(
 
 		var passwordHash = passwordHasher.HashPassword(request.Password);
 		var user = new User(request.Email, passwordHash);
+		user.UserRoles.Add(new UserRole
+		{
+			User = user,
+			RoleId = AuthConstants.RoleIds.Customer
+		});
 
 		await userRepository.AddAsync(user, cancellationToken);
 

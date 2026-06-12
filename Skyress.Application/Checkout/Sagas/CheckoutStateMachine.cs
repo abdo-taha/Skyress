@@ -49,7 +49,6 @@ public class CheckoutStateMachine : MassTransitStateMachine<CheckoutSagaData>
         Event(() => PaymentInitiatedEvent, e => e.CorrelateById(m => m.Message.CorrelationId));
         Event(() => FinalizedCheckoutEvent, e => e.CorrelateById(m => m.Message.CorrelationId));
         
-        // TODO reserving and selling items can be duplicate !! idemp..
 
         Initially(
             When(CheckoutInitiated)
