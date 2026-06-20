@@ -17,6 +17,7 @@ jobs:
   build-push-deploy:
     name: Build, push, and deploy to dev
     runs-on: [self-hosted, local-wsl]
+    environment: dev
 
     steps:
       - name: Checkout
