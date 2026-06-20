@@ -12,6 +12,7 @@ WORKDIR /src
 COPY ["Skyress/Skyress.API.csproj", "Skyress/"]
 COPY ["Skyress.Application/Skyress.Application.csproj", "Skyress.Application/"]
 COPY ["Skyress.Domain/Skyress.Domain.csproj", "Skyress.Domain/"]
+COPY ["Skyress.Infrastructure/Skyress.Infrastructure.csproj", "Skyress.Infrastructure/"]
 RUN dotnet restore "./Skyress/Skyress.API.csproj"
 COPY . .
 WORKDIR "/src/Skyress"

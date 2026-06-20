@@ -1,0 +1,85 @@
+name: Build and Deploy Dev
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: registry.localhost:5001
+  IMAGE_NAME: skyress
+  RELEASE_NAME: skyress
+  NAMESPACE: dev
+  KUBECONFIG: /home/github-runner/.kube/deployer-configs/dev.yaml
+
+jobs:
+  build-push-deploy:
+    name: Build, push, and deploy to dev
+    runs-on: [self-hosted, local-wsl]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify runner tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker version
+          kubectl version --client=true
+          helm version
+          kubectl auth can-i get deployments -n "${NAMESPACE}"
+
+      - name: Build Docker image
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE="${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}"
+          docker build \
+            --file Skyress/Dockerfile \
+            --tag "${IMAGE}" \
+            .
+          echo "IMAGE=${IMAGE}" >> "${GITHUB_ENV}"
+
+      - name: Push Docker image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker push "${IMAGE}"
+
+      - name: Create or update app secret
+        shell: bash
+        env:
+          SKYRESS_DB_CONNECTION_STRING: ${{ secrets.SKYRESS_DB_CONNECTION_STRING }}
+          SKYRESS_RABBITMQ_CONNECTION_STRING: ${{ secrets.SKYRESS_RABBITMQ_CONNECTION_STRING }}
+          SKYRESS_JWT_SECRET_KEY: ${{ secrets.SKYRESS_JWT_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+          : "${SKYRESS_DB_CONNECTION_STRING:?Set repository secret SKYRESS_DB_CONNECTION_STRING}"
+          : "${SKYRESS_RABBITMQ_CONNECTION_STRING:?Set repository secret SKYRESS_RABBITMQ_CONNECTION_STRING}"
+          : "${SKYRESS_JWT_SECRET_KEY:?Set repository secret SKYRESS_JWT_SECRET_KEY}"
+
+          kubectl -n "${NAMESPACE}" create secret generic skyress-app-secrets \
+            --from-literal=ConnectionStrings__SkyressDb="${SKYRESS_DB_CONNECTION_STRING}" \
+            --from-literal=ConnectionStrings__RabbitMq="${SKYRESS_RABBITMQ_CONNECTION_STRING}" \
+            --from-literal=Jwt__SecretKey="${SKYRESS_JWT_SECRET_KEY}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy with Helm
+        shell: bash
+        run: |
+          set -euo pipefail
+          helm upgrade --install "${RELEASE_NAME}" ./charts/skyress \
+            --namespace "${NAMESPACE}" \
+            --set image.repository="${REGISTRY}/${IMAGE_NAME}" \
+            --set image.tag="${GITHUB_SHA}" \
+            --wait \
+            --timeout 5m
+
+      - name: Show rollout status
+        shell: bash
+        run: |
+          set -euo pipefail
+          kubectl -n "${NAMESPACE}" rollout status deployment/"${RELEASE_NAME}" --timeout=2m
+          kubectl -n "${NAMESPACE}" get deployment,svc,pods -l app.kubernetes.io/instance="${RELEASE_NAME}"

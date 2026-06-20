@@ -15,3 +15,23 @@
 /Skyress.Domain/obj
 /Skyress.Domain/bin
 /.env
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# IDE and user-specific files
+.idea/
+*.DotSettings.user
+*.csproj.user
+
+# Local LLM/assistant tooling artifacts
+.agents/
+.claude/
+.codex/
+.specify/
+AGENTS.md
+CLAUDE.md
+my-project/

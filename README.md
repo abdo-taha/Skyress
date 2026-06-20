@@ -2,20 +2,23 @@
 
 Skyress is a .NET 8 backend for a shop/order workflow. It uses a layered architecture with Domain, Application, Infrastructure, and API projects, and it coordinates checkout with PostgreSQL, RabbitMQ, MassTransit sagas, MediatR commands, EF Core repositories, FluentValidation, JWT authentication, and typed domain errors.
 
-
-## Project Structure
+## Repository Structure
 
 ```text
-Skyress.Domain/              Business entities, aggregates, enums, domain exceptions, Result types
-Skyress.Application/         Commands, queries, validation, saga consumers, contracts
-Skyress.Infrastructure/      EF Core DbContext, repositories, migrations, services, saga configuration
-Skyress/                     Minimal API host, endpoints, middleware, auth, OpenAPI
-Skyress.Domain.Tests/        Domain unit tests
-Skyress.Application.Tests/   Application and API-boundary behavior tests
+Skyress/                      ASP.NET Core minimal API host, endpoints, middleware, auth, OpenAPI, Dockerfile
+Skyress.Domain/               Business entities, aggregates, enums, domain exceptions, Result types
+Skyress.Application/          Commands, queries, validation, saga consumers, contracts
+Skyress.Infrastructure/       EF Core DbContext, repositories, migrations, services, saga configuration
+Skyress.Domain.Tests/         Domain unit tests
+Skyress.Application.Tests/    Application and API-boundary behavior tests
 Skyress.Infrastructure.Tests/ Infrastructure, persistence, and integration tests
-docs/                        Architecture and integration documentation
-specs/                       Spec Kit feature specifications and implementation plans
+docs/                         Architecture, checkout, integration, Postman, and frontend documentation
+specs/                        Spec Kit feature specifications, plans, checklists, and task files
+local-ci/                     Local CI, Kubernetes, Helm, registry, and GitLab runner support files
+docker-compose*.yml           Local PostgreSQL/RabbitMQ and container orchestration files
 ```
+
+The solution file is `skyress.sln`. `Skyress.API/` is legacy endpoint scratch space and is not included in the solution. Local assistant/tooling folders such as `.agents/`, `.claude/`, `.codex/`, `.specify/`, and `my-project/` are development artifacts rather than runtime application code.
 
 ## Main Capabilities
 
@@ -87,6 +90,7 @@ http://localhost:5000/
 - [Checkout saga README](docs/CHECKOUT_SAGA_README.md)
 - [Frontend integration guide](docs/FRONTEND_INTEGRATION.md)
 - [Architecture review](docs/architecture-review/README.md)
+- [Checkout saga idempotency plan](specs/003-checkout-saga-idempotency/plan.md)
 - [DDD hardening plan](specs/004-ddd-pattern-hardening/plan.md)
 
 ## Current Implementation Status
