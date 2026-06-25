@@ -67,28 +67,6 @@ jobs:
             --from-literal=Jwt__SecretKey="${SKYRESS_JWT_SECRET_KEY}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Resolve ServiceMonitor access
-        shell: bash
-        run: |
-          set -euo pipefail
-          SERVICE_MONITOR_ENABLED=false
-
-          if kubectl api-resources --api-group=monitoring.coreos.com | grep -q '^servicemonitors'; then
-            if kubectl auth can-i get servicemonitors.monitoring.coreos.com -n "${NAMESPACE}" >/dev/null 2>&1 \
-              && kubectl auth can-i create servicemonitors.monitoring.coreos.com -n "${NAMESPACE}" >/dev/null 2>&1 \
-              && kubectl auth can-i update servicemonitors.monitoring.coreos.com -n "${NAMESPACE}" >/dev/null 2>&1 \
-              && kubectl auth can-i patch servicemonitors.monitoring.coreos.com -n "${NAMESPACE}" >/dev/null 2>&1 \
-              && kubectl auth can-i delete servicemonitors.monitoring.coreos.com -n "${NAMESPACE}" >/dev/null 2>&1; then
-              SERVICE_MONITOR_ENABLED=true
-            else
-              echo "::warning::ServiceMonitor CRD exists, but this deployer cannot manage servicemonitors.monitoring.coreos.com in namespace ${NAMESPACE}. Deploying without ServiceMonitor. Grant get,list,watch,create,update,patch,delete on servicemonitors to system:serviceaccount:${NAMESPACE}:gitlab-deployer to enable Prometheus Operator scraping."
-            fi
-          else
-            echo "::warning::ServiceMonitor CRD is not installed. Deploying without ServiceMonitor."
-          fi
-
-          echo "SERVICE_MONITOR_ENABLED=${SERVICE_MONITOR_ENABLED}" >> "${GITHUB_ENV}"
-
       - name: Deploy with Helm
         shell: bash
         run: |
@@ -104,7 +82,7 @@ jobs:
             --set metrics.enabled=true \
             --set metrics.path=/metrics \
             --set metrics.port=http \
-            --set serviceMonitor.enabled="${SERVICE_MONITOR_ENABLED}" \
+            --set serviceMonitor.enabled=true \
             --wait \
             --timeout 5m
 
