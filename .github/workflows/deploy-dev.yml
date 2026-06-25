@@ -7,7 +7,8 @@ permissions:
   contents: read
 
 env:
-  REGISTRY: registry.localhost:5001
+  PUSH_REGISTRY: 127.0.0.1:5001
+  DEPLOY_REGISTRY: registry.localhost:5001
   IMAGE_NAME: skyress
   RELEASE_NAME: skyress
   NAMESPACE: dev
@@ -36,7 +37,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          IMAGE="${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}"
+          IMAGE="${PUSH_REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}"
           docker build \
             --file Skyress/Dockerfile \
             --tag "${IMAGE}" \
@@ -73,7 +74,7 @@ jobs:
           set -euo pipefail
           helm upgrade --install "${RELEASE_NAME}" ./charts/skyress \
             --namespace "${NAMESPACE}" \
-            --set image.repository="${REGISTRY}/${IMAGE_NAME}" \
+            --set image.repository="${DEPLOY_REGISTRY}/${IMAGE_NAME}" \
             --set image.tag="${GITHUB_SHA}" \
             --set autoscaling.enabled=true \
             --set autoscaling.minReplicas=1 \
