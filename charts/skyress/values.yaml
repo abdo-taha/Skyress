@@ -79,8 +79,19 @@ probes:
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 80
+  maxReplicas: 5
+  targetRPS: "10"
+
+metrics:
+  enabled: false
+  path: /metrics
+  port: http
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
 
 podDisruptionBudget:
   enabled: false

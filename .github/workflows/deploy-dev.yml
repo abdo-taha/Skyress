@@ -75,6 +75,14 @@ jobs:
             --namespace "${NAMESPACE}" \
             --set image.repository="${REGISTRY}/${IMAGE_NAME}" \
             --set image.tag="${GITHUB_SHA}" \
+            --set autoscaling.enabled=true \
+            --set autoscaling.minReplicas=1 \
+            --set autoscaling.maxReplicas=5 \
+            --set-string autoscaling.targetRPS=10 \
+            --set metrics.enabled=true \
+            --set metrics.path=/metrics \
+            --set metrics.port=http \
+            --set serviceMonitor.enabled=true \
             --wait \
             --timeout 5m
 

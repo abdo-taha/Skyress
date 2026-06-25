@@ -11,6 +11,7 @@ using Skyress.API.Endpoints.TagAssignments;
 using Skyress.API.Endpoints.Baskets;
 using Skyress.Endpoints.Auth;
 using Skyress.Infrastructure.Services;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -26,6 +27,11 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+if (app.Configuration.GetValue("Metrics:Enabled", true))
+{
+    app.UseMiddleware<PrometheusRequestMetricsMiddleware>();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -38,6 +44,11 @@ app.MapTagsApi();
 app.MapTodosApi();
 app.MapTagAssignmentsApi();
 app.MapBasketsApi();
+
+if (app.Configuration.GetValue("Metrics:Enabled", true))
+{
+    app.MapMetrics(app.Configuration["Metrics:Path"] ?? "/metrics").AllowAnonymous();
+}
 
 
 if (app.Environment.IsDevelopment())

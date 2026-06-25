@@ -46,6 +46,19 @@ spec:
                 optional: false
             {{- end }}
           {{- end }}
+          env:
+            - name: Metrics__Enabled
+              value: {{ .Values.metrics.enabled | quote }}
+            - name: Metrics__Path
+              value: {{ .Values.metrics.path | quote }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           {{- if .Values.probes.enabled }}
           readinessProbe:
             tcpSocket:

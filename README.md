@@ -126,6 +126,28 @@ http://localhost:15672/
 
 Default RabbitMQ credentials are `guest` / `guest`.
 
+## Kubernetes Metrics and RPS Autoscaling
+
+The Helm chart can expose Prometheus metrics and scale the API with a Pods custom metric from Prometheus Adapter. Scaling is disabled by default.
+
+```yaml
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetRPS: "10"
+
+metrics:
+  enabled: true
+  path: /metrics
+  port: http
+
+serviceMonitor:
+  enabled: true
+```
+
+The API exports `http_requests_total` with `namespace` and `pod` labels so Prometheus Adapter can produce the `http_requests_per_second` Pods metric.
+
 ## API Notes
 
 - API versioning uses the `api-version` query string. Version `1.0` is the default.
