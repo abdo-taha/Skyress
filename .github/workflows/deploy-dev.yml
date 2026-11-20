@@ -73,6 +73,20 @@ jobs:
             --from-literal=Jwt__SecretKey="${SKYRESS_JWT_SECRET_KEY}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Apply EF Core migrations
+        shell: bash
+        env:
+          SKYRESS_DB_CONNECTION_STRING: ${{ secrets.SKYRESS_DB_CONNECTION_STRING }}
+        run: |
+          set -euo pipefail
+          dotnet tool restore
+          dotnet build Skyress/Skyress.API.csproj -c Release --no-restore
+          dotnet ef database update \
+            --project Skyress.Infrastructure/Skyress.Infrastructure.csproj \
+            --startup-project Skyress/Skyress.API.csproj \
+            --connection "${SKYRESS_DB_CONNECTION_STRING}" \
+            --no-build
+
       - name: Deploy with Helm
         shell: bash
         run: |
