@@ -12,17 +12,22 @@ env:
   IMAGE_NAME: skyress
   RELEASE_NAME: skyress
   NAMESPACE: dev
-  KUBECONFIG: /home/github-runner/.kube/deployer-configs/dev.yaml
 
 jobs:
   build-push-deploy:
     name: Build, push, and deploy to dev
-    runs-on: [self-hosted, local-wsl]
+    runs-on: [self-hosted]
     environment: dev
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set Kubernetes Context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG_DEV }}
 
       - name: Verify runner tooling
         shell: bash
@@ -83,7 +88,7 @@ jobs:
             --set metrics.enabled=true \
             --set metrics.path=/metrics \
             --set metrics.port=http \
-            --set serviceMonitor.enabled=true \
+            --set serviceMonitor.enabled=false \
             --wait \
             --timeout 5m
 
