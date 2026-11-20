@@ -73,6 +73,11 @@ jobs:
             --from-literal=Jwt__SecretKey="${SKYRESS_JWT_SECRET_KEY}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Apply EF Core migrations
         shell: bash
         env:
