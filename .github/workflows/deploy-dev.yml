@@ -90,6 +90,7 @@ jobs:
           dotnet ef database update \
             --project Skyress.Infrastructure/Skyress.Infrastructure.csproj \
             --startup-project Skyress/Skyress.API.csproj \
+            --configuration Release \
             --connection "${SKYRESS_DB_CONNECTION_STRING}" \
             --no-build
 
